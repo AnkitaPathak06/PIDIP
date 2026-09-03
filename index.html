@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PIDIP — Procurement &amp; Inventory Decision Intelligence Platform</title>
+
+<!-- PWA: makes this installable as an app on desktop and mobile -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0d2229" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="PIDIP" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
+<style>
+  :root{
+    --bg:#f4f6f4; --surface:#ffffff; --ink:#0f2027; --ink-soft:#5a6b70; --ink-faint:#8fa0a4;
+    --line:#dbe2df; --line-soft:#e9ede9; --accent:#0f7f82; --accent-deep:#0a5c5e;
+    --amber:#b9762b; --amber-tint:#faf1e3; --red:#a63a2e; --red-tint:#f8e9e6; --green:#3d7a5c; --green-tint:#e8f2ec;
+    --font-display:'Space Grotesk','Inter',sans-serif; --font-body:'Inter',-apple-system,sans-serif; --font-mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body,#root{height:100%;margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:14px;-webkit-font-smoothing:antialiased}
+  table{border-collapse:collapse;width:100%}
+  input,select,button{font-family:var(--font-body)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useMemo } = React;
+
+const RAW = {"Products":[{"Product ID":"P001","Product Name":"Paracetamol 500 mg Tablets","Category":"Analgesic","Dosage Form":"Tablet"},{"Product ID":"P002","Product Name":"Ibuprofen 400 mg Tablets","Category":"Analgesic","Dosage Form":"Tablet"},{"Product ID":"P003","Product Name":"Amoxicillin 500 mg Capsules","Category":"Antibiotic","Dosage Form":"Capsule"},{"Product ID":"P004","Product Name":"Cetirizine 10 mg Tablets","Category":"Antihistamine","Dosage Form":"Tablet"},{"Product ID":"P005","Product Name":"Multivitamin Capsules","Category":"Nutraceutical","Dosage Form":"Capsule"},{"Product ID":"P006","Product Name":"Paracetamol Pediatric Suspension","Category":"Analgesic","Dosage Form":"Liquid"},{"Product ID":"P007","Product Name":"Dextromethorphan Cough Syrup","Category":"Respiratory","Dosage Form":"Syrup"},{"Product ID":"P008","Product Name":"Oral Rehydration Salts Powder","Category":"Electrolyte Solution","Dosage Form":"Powder"},{"Product ID":"P009","Product Name":"Azithromycin 250 mg Tablets","Category":"Antibiotic","Dosage Form":"Tablet"},{"Product ID":"P010","Product Name":"Iron & Vitamin C Syrup","Category":"Nutraceutical","Dosage Form":"Syrup"}],"Materials":[{"Material ID":"RM001","Material Name":"Paracetamol API","Category":"API","Unit":"Kg","Shelf Life (Days)":730,"Criticality":"HIGH"},{"Material ID":"RM002","Material Name":"Ibuprofen API","Category":"API","Unit":"Kg","Shelf Life (Days)":730,"Criticality":"HIGH"},{"Material ID":"RM003","Material Name":"Amoxicillin API","Category":"API","Unit":"Kg","Shelf Life (Days)":730,"Criticality":"HIGH"},{"Material ID":"RM004","Material Name":"Cetirizine Hydrochloride","Category":"API","Unit":"Kg","Shelf Life (Days)":730,"Criticality":"HIGH"},{"Material ID":"RM005","Material Name":"Ascorbic Acid","Category":"API","Unit":"Kg","Shelf Life (Days)":730,"Criticality":"HIGH"},{"Material ID":"RM006","Material Name":"Azithromycin Dihydrate","Category":"API","Unit":"Kg","Shelf Life (Days)":730,"Criticality":"HIGH"},{"Material ID":"RM007","Material Name":"Ferrous Fumarate","Category":"API","Unit":"Kg","Shelf Life (Days)":730,"Criticality":"HIGH"},{"Material ID":"RM008","Material Name":"Dextromethorphan Hydrobromide","Category":"API","Unit":"Kg","Shelf Life (Days)":730,"Criticality":"HIGH"},{"Material ID":"RM009","Material Name":"Lactose Monohydrate","Category":"Excipient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"HIGH"},{"Material ID":"RM010","Material Name":"Microcrystalline Cellulose","Category":"Excipient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM011","Material Name":"Povidone K30","Category":"Excipient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM012","Material Name":"Croscarmellose Sodium","Category":"Excipient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM013","Material Name":"Magnesium Stearate","Category":"Excipient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"HIGH"},{"Material ID":"RM014","Material Name":"Talc Pharmaceutical Grade","Category":"Excipient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"LOW"},{"Material ID":"RM015","Material Name":"Colloidal Silicon Dioxide","Category":"Excipient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM016","Material Name":"Sodium Starch Glycolate","Category":"Excipient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM017","Material Name":"Pregelatinized Starch","Category":"Excipient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM018","Material Name":"Hydroxypropyl Methylcellulose","Category":"Excipient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM019","Material Name":"Dextrose Anhydrous","Category":"Excipient","Unit":"Kg","Shelf Life (Days)":730,"Criticality":"MEDIUM"},{"Material ID":"RM020","Material Name":"Sodium Chloride IP","Category":"Excipient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM021","Material Name":"Purified Water","Category":"Liquid/Syrup Ingredient","Unit":"Litre","Shelf Life (Days)":365,"Criticality":"MEDIUM"},{"Material ID":"RM022","Material Name":"Sorbitol Solution 70%","Category":"Liquid/Syrup Ingredient","Unit":"Litre","Shelf Life (Days)":730,"Criticality":"MEDIUM"},{"Material ID":"RM023","Material Name":"Sucrose IP","Category":"Liquid/Syrup Ingredient","Unit":"Kg","Shelf Life (Days)":730,"Criticality":"MEDIUM"},{"Material ID":"RM024","Material Name":"Glycerin IP","Category":"Liquid/Syrup Ingredient","Unit":"Litre","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM025","Material Name":"Sodium Benzoate","Category":"Liquid/Syrup Ingredient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM026","Material Name":"Citric Acid Monohydrate","Category":"Liquid/Syrup Ingredient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM027","Material Name":"Potassium Chloride IP","Category":"Liquid/Syrup Ingredient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM028","Material Name":"Sodium Citrate","Category":"Liquid/Syrup Ingredient","Unit":"Kg","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM029","Material Name":"Peppermint Flavour","Category":"Liquid/Syrup Ingredient","Unit":"Litre","Shelf Life (Days)":730,"Criticality":"LOW"},{"Material ID":"RM030","Material Name":"Orange Flavour","Category":"Liquid/Syrup Ingredient","Unit":"Litre","Shelf Life (Days)":730,"Criticality":"LOW"},{"Material ID":"RM031","Material Name":"Aluminium Foil","Category":"Packaging Material","Unit":"Roll","Shelf Life (Days)":1825,"Criticality":"HIGH"},{"Material ID":"RM032","Material Name":"PVC Blister Film","Category":"Packaging Material","Unit":"Roll","Shelf Life (Days)":1095,"Criticality":"HIGH"},{"Material ID":"RM033","Material Name":"Hard Gelatin Capsule Shells","Category":"Packaging Material","Unit":"Piece","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM034","Material Name":"HDPE Bottle 100 mL","Category":"Packaging Material","Unit":"Piece","Shelf Life (Days)":1825,"Criticality":"HIGH"},{"Material ID":"RM035","Material Name":"Amber Glass Bottle 100 mL","Category":"Packaging Material","Unit":"Piece","Shelf Life (Days)":1825,"Criticality":"MEDIUM"},{"Material ID":"RM036","Material Name":"PP Closure 28 mm","Category":"Packaging Material","Unit":"Piece","Shelf Life (Days)":1825,"Criticality":"HIGH"},{"Material ID":"RM037","Material Name":"Measuring Cup 10 mL","Category":"Packaging Material","Unit":"Piece","Shelf Life (Days)":1825,"Criticality":"LOW"},{"Material ID":"RM038","Material Name":"Printed Carton - Small","Category":"Packaging Material","Unit":"Piece","Shelf Life (Days)":1095,"Criticality":"HIGH"},{"Material ID":"RM039","Material Name":"Product Label Roll","Category":"Packaging Material","Unit":"Roll","Shelf Life (Days)":1095,"Criticality":"HIGH"},{"Material ID":"RM040","Material Name":"Laminated Sachet Film","Category":"Packaging Material","Unit":"Roll","Shelf Life (Days)":1095,"Criticality":"MEDIUM"},{"Material ID":"RM041","Material Name":"Corrugated Shipper Box","Category":"Packaging Material","Unit":"Piece","Shelf Life (Days)":1095,"Criticality":"LOW"},{"Material ID":"RM042","Material Name":"Desiccant Sachet 1 g","Category":"Packaging Material","Unit":"Piece","Shelf Life (Days)":1095,"Criticality":"MEDIUM"}],"Bill of Materials":[{"Product ID":"P001","Product Name":"Paracetamol 500 mg Tablets","Material ID":"RM001","Material Name":"Paracetamol API","Quantity per Batch":100,"Unit":"Kg"},{"Product ID":"P001","Product Name":"Paracetamol 500 mg Tablets","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity per Batch":38,"Unit":"Kg"},{"Product ID":"P001","Product Name":"Paracetamol 500 mg Tablets","Material ID":"RM010","Material Name":"Microcrystalline Cellulose","Quantity per Batch":24,"Unit":"Kg"},{"Product ID":"P001","Product Name":"Paracetamol 500 mg Tablets","Material ID":"RM011","Material Name":"Povidone K30","Quantity per Batch":6,"Unit":"Kg"},{"Product ID":"P001","Product Name":"Paracetamol 500 mg Tablets","Material ID":"RM012","Material Name":"Croscarmellose Sodium","Quantity per Batch":5,"Unit":"Kg"},{"Product ID":"P001","Product Name":"Paracetamol 500 mg Tablets","Material ID":"RM013","Material Name":"Magnesium Stearate","Quantity per Batch":2,"Unit":"Kg"},{"Product ID":"P001","Product Name":"Paracetamol 500 mg Tablets","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity per Batch":6,"Unit":"Roll"},{"Product ID":"P001","Product Name":"Paracetamol 500 mg Tablets","Material ID":"RM032","Material Name":"PVC Blister Film","Quantity per Batch":7,"Unit":"Roll"},{"Product ID":"P001","Product Name":"Paracetamol 500 mg Tablets","Material ID":"RM038","Material Name":"Printed Carton - Small","Quantity per Batch":10000,"Unit":"Piece"},{"Product ID":"P002","Product Name":"Ibuprofen 400 mg Tablets","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity per Batch":80,"Unit":"Kg"},{"Product ID":"P002","Product Name":"Ibuprofen 400 mg Tablets","Material ID":"RM010","Material Name":"Microcrystalline Cellulose","Quantity per Batch":28,"Unit":"Kg"},{"Product ID":"P002","Product Name":"Ibuprofen 400 mg Tablets","Material ID":"RM011","Material Name":"Povidone K30","Quantity per Batch":5,"Unit":"Kg"},{"Product ID":"P002","Product Name":"Ibuprofen 400 mg Tablets","Material ID":"RM014","Material Name":"Talc Pharmaceutical Grade","Quantity per Batch":2,"Unit":"Kg"},{"Product ID":"P002","Product Name":"Ibuprofen 400 mg Tablets","Material ID":"RM015","Material Name":"Colloidal Silicon Dioxide","Quantity per Batch":2,"Unit":"Kg"},{"Product ID":"P002","Product Name":"Ibuprofen 400 mg Tablets","Material ID":"RM016","Material Name":"Sodium Starch Glycolate","Quantity per Batch":8,"Unit":"Kg"},{"Product ID":"P002","Product Name":"Ibuprofen 400 mg Tablets","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity per Batch":6,"Unit":"Roll"},{"Product ID":"P002","Product Name":"Ibuprofen 400 mg Tablets","Material ID":"RM032","Material Name":"PVC Blister Film","Quantity per Batch":7,"Unit":"Roll"},{"Product ID":"P002","Product Name":"Ibuprofen 400 mg Tablets","Material ID":"RM038","Material Name":"Printed Carton - Small","Quantity per Batch":10000,"Unit":"Piece"},{"Product ID":"P003","Product Name":"Amoxicillin 500 mg Capsules","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity per Batch":75,"Unit":"Kg"},{"Product ID":"P003","Product Name":"Amoxicillin 500 mg Capsules","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity per Batch":25,"Unit":"Kg"},{"Product ID":"P003","Product Name":"Amoxicillin 500 mg Capsules","Material ID":"RM010","Material Name":"Microcrystalline Cellulose","Quantity per Batch":12,"Unit":"Kg"},{"Product ID":"P003","Product Name":"Amoxicillin 500 mg Capsules","Material ID":"RM013","Material Name":"Magnesium Stearate","Quantity per Batch":1.5,"Unit":"Kg"},{"Product ID":"P003","Product Name":"Amoxicillin 500 mg Capsules","Material ID":"RM015","Material Name":"Colloidal Silicon Dioxide","Quantity per Batch":1,"Unit":"Kg"},{"Product ID":"P003","Product Name":"Amoxicillin 500 mg Capsules","Material ID":"RM018","Material Name":"Hydroxypropyl Methylcellulose","Quantity per Batch":3,"Unit":"Kg"},{"Product ID":"P003","Product Name":"Amoxicillin 500 mg Capsules","Material ID":"RM033","Material Name":"Hard Gelatin Capsule Shells","Quantity per Batch":200000,"Unit":"Piece"},{"Product ID":"P003","Product Name":"Amoxicillin 500 mg Capsules","Material ID":"RM038","Material Name":"Printed Carton - Small","Quantity per Batch":10000,"Unit":"Piece"},{"Product ID":"P003","Product Name":"Amoxicillin 500 mg Capsules","Material ID":"RM042","Material Name":"Desiccant Sachet 1 g","Quantity per Batch":1000,"Unit":"Piece"},{"Product ID":"P004","Product Name":"Cetirizine 10 mg Tablets","Material ID":"RM004","Material Name":"Cetirizine Hydrochloride","Quantity per Batch":2,"Unit":"Kg"},{"Product ID":"P004","Product Name":"Cetirizine 10 mg Tablets","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity per Batch":50,"Unit":"Kg"},{"Product ID":"P004","Product Name":"Cetirizine 10 mg Tablets","Material ID":"RM010","Material Name":"Microcrystalline Cellulose","Quantity per Batch":30,"Unit":"Kg"},{"Product ID":"P004","Product Name":"Cetirizine 10 mg Tablets","Material ID":"RM011","Material Name":"Povidone K30","Quantity per Batch":4,"Unit":"Kg"},{"Product ID":"P004","Product Name":"Cetirizine 10 mg Tablets","Material ID":"RM012","Material Name":"Croscarmellose Sodium","Quantity per Batch":5,"Unit":"Kg"},{"Product ID":"P004","Product Name":"Cetirizine 10 mg Tablets","Material ID":"RM013","Material Name":"Magnesium Stearate","Quantity per Batch":1.5,"Unit":"Kg"},{"Product ID":"P004","Product Name":"Cetirizine 10 mg Tablets","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity per Batch":5,"Unit":"Roll"},{"Product ID":"P004","Product Name":"Cetirizine 10 mg Tablets","Material ID":"RM032","Material Name":"PVC Blister Film","Quantity per Batch":6,"Unit":"Roll"},{"Product ID":"P004","Product Name":"Cetirizine 10 mg Tablets","Material ID":"RM038","Material Name":"Printed Carton - Small","Quantity per Batch":10000,"Unit":"Piece"},{"Product ID":"P005","Product Name":"Multivitamin Capsules","Material ID":"RM005","Material Name":"Ascorbic Acid","Quantity per Batch":20,"Unit":"Kg"},{"Product ID":"P005","Product Name":"Multivitamin Capsules","Material ID":"RM007","Material Name":"Ferrous Fumarate","Quantity per Batch":15,"Unit":"Kg"},{"Product ID":"P005","Product Name":"Multivitamin Capsules","Material ID":"RM010","Material Name":"Microcrystalline Cellulose","Quantity per Batch":20,"Unit":"Kg"},{"Product ID":"P005","Product Name":"Multivitamin Capsules","Material ID":"RM013","Material Name":"Magnesium Stearate","Quantity per Batch":1,"Unit":"Kg"},{"Product ID":"P005","Product Name":"Multivitamin Capsules","Material ID":"RM015","Material Name":"Colloidal Silicon Dioxide","Quantity per Batch":1,"Unit":"Kg"},{"Product ID":"P005","Product Name":"Multivitamin Capsules","Material ID":"RM018","Material Name":"Hydroxypropyl Methylcellulose","Quantity per Batch":2,"Unit":"Kg"},{"Product ID":"P005","Product Name":"Multivitamin Capsules","Material ID":"RM033","Material Name":"Hard Gelatin Capsule Shells","Quantity per Batch":150000,"Unit":"Piece"},{"Product ID":"P005","Product Name":"Multivitamin Capsules","Material ID":"RM038","Material Name":"Printed Carton - Small","Quantity per Batch":7500,"Unit":"Piece"},{"Product ID":"P005","Product Name":"Multivitamin Capsules","Material ID":"RM042","Material Name":"Desiccant Sachet 1 g","Quantity per Batch":750,"Unit":"Piece"},{"Product ID":"P006","Product Name":"Paracetamol Pediatric Suspension","Material ID":"RM001","Material Name":"Paracetamol API","Quantity per Batch":12,"Unit":"Kg"},{"Product ID":"P006","Product Name":"Paracetamol Pediatric Suspension","Material ID":"RM021","Material Name":"Purified Water","Quantity per Batch":850,"Unit":"Litre"},{"Product ID":"P006","Product Name":"Paracetamol Pediatric Suspension","Material ID":"RM022","Material Name":"Sorbitol Solution 70%","Quantity per Batch":220,"Unit":"Litre"},{"Product ID":"P006","Product Name":"Paracetamol Pediatric Suspension","Material ID":"RM024","Material Name":"Glycerin IP","Quantity per Batch":45,"Unit":"Litre"},{"Product ID":"P006","Product Name":"Paracetamol Pediatric Suspension","Material ID":"RM025","Material Name":"Sodium Benzoate","Quantity per Batch":1.2,"Unit":"Kg"},{"Product ID":"P006","Product Name":"Paracetamol Pediatric Suspension","Material ID":"RM030","Material Name":"Orange Flavour","Quantity per Batch":3,"Unit":"Litre"},{"Product ID":"P006","Product Name":"Paracetamol Pediatric Suspension","Material ID":"RM035","Material Name":"Amber Glass Bottle 100 mL","Quantity per Batch":10000,"Unit":"Piece"},{"Product ID":"P006","Product Name":"Paracetamol Pediatric Suspension","Material ID":"RM036","Material Name":"PP Closure 28 mm","Quantity per Batch":10000,"Unit":"Piece"},{"Product ID":"P006","Product Name":"Paracetamol Pediatric Suspension","Material ID":"RM037","Material Name":"Measuring Cup 10 mL","Quantity per Batch":10000,"Unit":"Piece"},{"Product ID":"P006","Product Name":"Paracetamol Pediatric Suspension","Material ID":"RM039","Material Name":"Product Label Roll","Quantity per Batch":10,"Unit":"Roll"},{"Product ID":"P007","Product Name":"Dextromethorphan Cough Syrup","Material ID":"RM008","Material Name":"Dextromethorphan Hydrobromide","Quantity per Batch":0.6,"Unit":"Kg"},{"Product ID":"P007","Product Name":"Dextromethorphan Cough Syrup","Material ID":"RM021","Material Name":"Purified Water","Quantity per Batch":900,"Unit":"Litre"},{"Product ID":"P007","Product Name":"Dextromethorphan Cough Syrup","Material ID":"RM022","Material Name":"Sorbitol Solution 70%","Quantity per Batch":180,"Unit":"Litre"},{"Product ID":"P007","Product Name":"Dextromethorphan Cough Syrup","Material ID":"RM023","Material Name":"Sucrose IP","Quantity per Batch":240,"Unit":"Kg"},{"Product ID":"P007","Product Name":"Dextromethorphan Cough Syrup","Material ID":"RM024","Material Name":"Glycerin IP","Quantity per Batch":35,"Unit":"Litre"},{"Product ID":"P007","Product Name":"Dextromethorphan Cough Syrup","Material ID":"RM025","Material Name":"Sodium Benzoate","Quantity per Batch":1.1,"Unit":"Kg"},{"Product ID":"P007","Product Name":"Dextromethorphan Cough Syrup","Material ID":"RM029","Material Name":"Peppermint Flavour","Quantity per Batch":2.5,"Unit":"Litre"},{"Product ID":"P007","Product Name":"Dextromethorphan Cough Syrup","Material ID":"RM034","Material Name":"HDPE Bottle 100 mL","Quantity per Batch":10000,"Unit":"Piece"},{"Product ID":"P007","Product Name":"Dextromethorphan Cough Syrup","Material ID":"RM036","Material Name":"PP Closure 28 mm","Quantity per Batch":10000,"Unit":"Piece"},{"Product ID":"P007","Product Name":"Dextromethorphan Cough Syrup","Material ID":"RM039","Material Name":"Product Label Roll","Quantity per Batch":10,"Unit":"Roll"},{"Product ID":"P008","Product Name":"Oral Rehydration Salts Powder","Material ID":"RM019","Material Name":"Dextrose Anhydrous","Quantity per Batch":135,"Unit":"Kg"},{"Product ID":"P008","Product Name":"Oral Rehydration Salts Powder","Material ID":"RM020","Material Name":"Sodium Chloride IP","Quantity per Batch":32.5,"Unit":"Kg"},{"Product ID":"P008","Product Name":"Oral Rehydration Salts Powder","Material ID":"RM027","Material Name":"Potassium Chloride IP","Quantity per Batch":7.5,"Unit":"Kg"},{"Product ID":"P008","Product Name":"Oral Rehydration Salts Powder","Material ID":"RM028","Material Name":"Sodium Citrate","Quantity per Batch":29,"Unit":"Kg"},{"Product ID":"P008","Product Name":"Oral Rehydration Salts Powder","Material ID":"RM030","Material Name":"Orange Flavour","Quantity per Batch":1,"Unit":"Litre"},{"Product ID":"P008","Product Name":"Oral Rehydration Salts Powder","Material ID":"RM040","Material Name":"Laminated Sachet Film","Quantity per Batch":8,"Unit":"Roll"},{"Product ID":"P008","Product Name":"Oral Rehydration Salts Powder","Material ID":"RM038","Material Name":"Printed Carton - Small","Quantity per Batch":10000,"Unit":"Piece"},{"Product ID":"P008","Product Name":"Oral Rehydration Salts Powder","Material ID":"RM041","Material Name":"Corrugated Shipper Box","Quantity per Batch":200,"Unit":"Piece"},{"Product ID":"P009","Product Name":"Azithromycin 250 mg Tablets","Material ID":"RM006","Material Name":"Azithromycin Dihydrate","Quantity per Batch":50,"Unit":"Kg"},{"Product ID":"P009","Product Name":"Azithromycin 250 mg Tablets","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity per Batch":35,"Unit":"Kg"},{"Product ID":"P009","Product Name":"Azithromycin 250 mg Tablets","Material ID":"RM010","Material Name":"Microcrystalline Cellulose","Quantity per Batch":22,"Unit":"Kg"},{"Product ID":"P009","Product Name":"Azithromycin 250 mg Tablets","Material ID":"RM011","Material Name":"Povidone K30","Quantity per Batch":5,"Unit":"Kg"},{"Product ID":"P009","Product Name":"Azithromycin 250 mg Tablets","Material ID":"RM012","Material Name":"Croscarmellose Sodium","Quantity per Batch":4,"Unit":"Kg"},{"Product ID":"P009","Product Name":"Azithromycin 250 mg Tablets","Material ID":"RM013","Material Name":"Magnesium Stearate","Quantity per Batch":1.5,"Unit":"Kg"},{"Product ID":"P009","Product Name":"Azithromycin 250 mg Tablets","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity per Batch":5,"Unit":"Roll"},{"Product ID":"P009","Product Name":"Azithromycin 250 mg Tablets","Material ID":"RM032","Material Name":"PVC Blister Film","Quantity per Batch":6,"Unit":"Roll"},{"Product ID":"P009","Product Name":"Azithromycin 250 mg Tablets","Material ID":"RM038","Material Name":"Printed Carton - Small","Quantity per Batch":10000,"Unit":"Piece"},{"Product ID":"P010","Product Name":"Iron & Vitamin C Syrup","Material ID":"RM007","Material Name":"Ferrous Fumarate","Quantity per Batch":18,"Unit":"Kg"},{"Product ID":"P010","Product Name":"Iron & Vitamin C Syrup","Material ID":"RM005","Material Name":"Ascorbic Acid","Quantity per Batch":12,"Unit":"Kg"},{"Product ID":"P010","Product Name":"Iron & Vitamin C Syrup","Material ID":"RM021","Material Name":"Purified Water","Quantity per Batch":780,"Unit":"Litre"},{"Product ID":"P010","Product Name":"Iron & Vitamin C Syrup","Material ID":"RM022","Material Name":"Sorbitol Solution 70%","Quantity per Batch":180,"Unit":"Litre"},{"Product ID":"P010","Product Name":"Iron & Vitamin C Syrup","Material ID":"RM023","Material Name":"Sucrose IP","Quantity per Batch":160,"Unit":"Kg"},{"Product ID":"P010","Product Name":"Iron & Vitamin C Syrup","Material ID":"RM025","Material Name":"Sodium Benzoate","Quantity per Batch":1,"Unit":"Kg"},{"Product ID":"P010","Product Name":"Iron & Vitamin C Syrup","Material ID":"RM030","Material Name":"Orange Flavour","Quantity per Batch":3,"Unit":"Litre"},{"Product ID":"P010","Product Name":"Iron & Vitamin C Syrup","Material ID":"RM035","Material Name":"Amber Glass Bottle 100 mL","Quantity per Batch":10000,"Unit":"Piece"},{"Product ID":"P010","Product Name":"Iron & Vitamin C Syrup","Material ID":"RM036","Material Name":"PP Closure 28 mm","Quantity per Batch":10000,"Unit":"Piece"},{"Product ID":"P010","Product Name":"Iron & Vitamin C Syrup","Material ID":"RM037","Material Name":"Measuring Cup 10 mL","Quantity per Batch":10000,"Unit":"Piece"}],"Supplier Catalog":[{"Supplier ID":"SUP001","Supplier Name":"Arvind PharmaChem Pvt Ltd","Material ID":"RM001","Material Name":"Paracetamol API","Unit Price (INR)":504.4,"Lead Time (Days)":4,"MOQ":100,"Quality Score":86,"Reliability Score":85,"Availability":"Available"},{"Supplier ID":"SUP002","Supplier Name":"Bharat Active Ingredients Ltd","Material ID":"RM001","Material Name":"Paracetamol API","Unit Price (INR)":547.3,"Lead Time (Days)":6,"MOQ":80,"Quality Score":92,"Reliability Score":91,"Availability":"Available"},{"Supplier ID":"SUP008","Supplier Name":"Apex Pharma Resources Ltd","Material ID":"RM001","Material Name":"Paracetamol API","Unit Price (INR)":568.3,"Lead Time (Days)":13,"MOQ":125,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP001","Supplier Name":"Arvind PharmaChem Pvt Ltd","Material ID":"RM002","Material Name":"Ibuprofen API","Unit Price (INR)":962,"Lead Time (Days)":6,"MOQ":75,"Quality Score":86,"Reliability Score":85,"Availability":"Available"},{"Supplier ID":"SUP002","Supplier Name":"Bharat Active Ingredients Ltd","Material ID":"RM002","Material Name":"Ibuprofen API","Unit Price (INR)":1007,"Lead Time (Days)":8,"MOQ":60,"Quality Score":92,"Reliability Score":91,"Availability":"Available"},{"Supplier ID":"SUP008","Supplier Name":"Apex Pharma Resources Ltd","Material ID":"RM002","Material Name":"Ibuprofen API","Unit Price (INR)":1045.7,"Lead Time (Days)":3,"MOQ":93.8,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP001","Supplier Name":"Arvind PharmaChem Pvt Ltd","Material ID":"RM003","Material Name":"Amoxicillin API","Unit Price (INR)":2539.7,"Lead Time (Days)":8,"MOQ":50,"Quality Score":92,"Reliability Score":91,"Availability":"Available"},{"Supplier ID":"SUP002","Supplier Name":"Bharat Active Ingredients Ltd","Material ID":"RM003","Material Name":"Amoxicillin API","Unit Price (INR)":2756,"Lead Time (Days)":10,"MOQ":40,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP008","Supplier Name":"Apex Pharma Resources Ltd","Material ID":"RM003","Material Name":"Amoxicillin API","Unit Price (INR)":2862,"Lead Time (Days)":5,"MOQ":62.5,"Quality Score":86,"Reliability Score":85,"Availability":"Unavailable"},{"Supplier ID":"SUP001","Supplier Name":"Arvind PharmaChem Pvt Ltd","Material ID":"RM004","Material Name":"Cetirizine Hydrochloride","Unit Price (INR)":7566,"Lead Time (Days)":10,"MOQ":10,"Quality Score":92,"Reliability Score":91,"Availability":"Available"},{"Supplier ID":"SUP002","Supplier Name":"Bharat Active Ingredients Ltd","Material ID":"RM004","Material Name":"Cetirizine Hydrochloride","Unit Price (INR)":8209.3,"Lead Time (Days)":12,"MOQ":8,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP008","Supplier Name":"Apex Pharma Resources Ltd","Material ID":"RM004","Material Name":"Cetirizine Hydrochloride","Unit Price (INR)":8525.1,"Lead Time (Days)":7,"MOQ":12.5,"Quality Score":86,"Reliability Score":85,"Availability":"Available"},{"Supplier ID":"SUP001","Supplier Name":"Arvind PharmaChem Pvt Ltd","Material ID":"RM005","Material Name":"Ascorbic Acid","Unit Price (INR)":608.6,"Lead Time (Days)":12,"MOQ":50,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP002","Supplier Name":"Bharat Active Ingredients Ltd","Material ID":"RM005","Material Name":"Ascorbic Acid","Unit Price (INR)":637.1,"Lead Time (Days)":14,"MOQ":40,"Quality Score":86,"Reliability Score":85,"Availability":"Available"},{"Supplier ID":"SUP008","Supplier Name":"Apex Pharma Resources Ltd","Material ID":"RM005","Material Name":"Ascorbic Acid","Unit Price (INR)":661.6,"Lead Time (Days)":9,"MOQ":62.5,"Quality Score":92,"Reliability Score":91,"Availability":"Available"},{"Supplier ID":"SUP001","Supplier Name":"Arvind PharmaChem Pvt Ltd","Material ID":"RM006","Material Name":"Azithromycin Dihydrate","Unit Price (INR)":5175.1,"Lead Time (Days)":14,"MOQ":25,"Quality Score":86,"Reliability Score":85,"Availability":"Available"},{"Supplier ID":"SUP002","Supplier Name":"Bharat Active Ingredients Ltd","Material ID":"RM006","Material Name":"Azithromycin Dihydrate","Unit Price (INR)":5616,"Lead Time (Days)":4,"MOQ":20,"Quality Score":92,"Reliability Score":91,"Availability":"Available"},{"Supplier ID":"SUP008","Supplier Name":"Apex Pharma Resources Ltd","Material ID":"RM006","Material Name":"Azithromycin Dihydrate","Unit Price (INR)":5832,"Lead Time (Days)":11,"MOQ":31.3,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP001","Supplier Name":"Arvind PharmaChem Pvt Ltd","Material ID":"RM007","Material Name":"Ferrous Fumarate","Unit Price (INR)":824.5,"Lead Time (Days)":4,"MOQ":50,"Quality Score":92,"Reliability Score":91,"Availability":"Available"},{"Supplier ID":"SUP002","Supplier Name":"Bharat Active Ingredients Ltd","Material ID":"RM007","Material Name":"Ferrous Fumarate","Unit Price (INR)":894.6,"Lead Time (Days)":6,"MOQ":40,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP008","Supplier Name":"Apex Pharma Resources Ltd","Material ID":"RM007","Material Name":"Ferrous Fumarate","Unit Price (INR)":929,"Lead Time (Days)":13,"MOQ":62.5,"Quality Score":86,"Reliability Score":85,"Availability":"Available"},{"Supplier ID":"SUP001","Supplier Name":"Arvind PharmaChem Pvt Ltd","Material ID":"RM008","Material Name":"Dextromethorphan Hydrobromide","Unit Price (INR)":12270.5,"Lead Time (Days)":6,"MOQ":5,"Quality Score":92,"Reliability Score":91,"Availability":"Available"},{"Supplier ID":"SUP002","Supplier Name":"Bharat Active Ingredients Ltd","Material ID":"RM008","Material Name":"Dextromethorphan Hydrobromide","Unit Price (INR)":12844,"Lead Time (Days)":8,"MOQ":4,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP008","Supplier Name":"Apex Pharma Resources Ltd","Material ID":"RM008","Material Name":"Dextromethorphan Hydrobromide","Unit Price (INR)":13338,"Lead Time (Days)":3,"MOQ":6.3,"Quality Score":86,"Reliability Score":85,"Availability":"Available"},{"Supplier ID":"SUP001","Supplier Name":"Arvind PharmaChem Pvt Ltd","Material ID":"RM009","Material Name":"Lactose Monohydrate","Unit Price (INR)":74.8,"Lead Time (Days)":8,"MOQ":250,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP003","Supplier Name":"Deccan Excipients Pvt Ltd","Material ID":"RM009","Material Name":"Lactose Monohydrate","Unit Price (INR)":82.1,"Lead Time (Days)":11,"MOQ":200,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP003","Supplier Name":"Deccan Excipients Pvt Ltd","Material ID":"RM010","Material Name":"Microcrystalline Cellulose","Unit Price (INR)":158.1,"Lead Time (Days)":12,"MOQ":200,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM010","Material Name":"Microcrystalline Cellulose","Unit Price (INR)":171.6,"Lead Time (Days)":14,"MOQ":160,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP003","Supplier Name":"Deccan Excipients Pvt Ltd","Material ID":"RM011","Material Name":"Povidone K30","Unit Price (INR)":300.7,"Lead Time (Days)":14,"MOQ":50,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM011","Material Name":"Povidone K30","Unit Price (INR)":326.3,"Lead Time (Days)":4,"MOQ":40,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP001","Supplier Name":"Arvind PharmaChem Pvt Ltd","Material ID":"RM012","Material Name":"Croscarmellose Sodium","Unit Price (INR)":402.5,"Lead Time (Days)":14,"MOQ":25,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP003","Supplier Name":"Deccan Excipients Pvt Ltd","Material ID":"RM012","Material Name":"Croscarmellose Sodium","Unit Price (INR)":442,"Lead Time (Days)":5,"MOQ":20,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP003","Supplier Name":"Deccan Excipients Pvt Ltd","Material ID":"RM013","Material Name":"Magnesium Stearate","Unit Price (INR)":230,"Lead Time (Days)":6,"MOQ":25,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM013","Material Name":"Magnesium Stearate","Unit Price (INR)":249.6,"Lead Time (Days)":8,"MOQ":20,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP003","Supplier Name":"Deccan Excipients Pvt Ltd","Material ID":"RM014","Material Name":"Talc Pharmaceutical Grade","Unit Price (INR)":40.7,"Lead Time (Days)":8,"MOQ":100,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM014","Material Name":"Talc Pharmaceutical Grade","Unit Price (INR)":44.2,"Lead Time (Days)":10,"MOQ":80,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP001","Supplier Name":"Arvind PharmaChem Pvt Ltd","Material ID":"RM015","Material Name":"Colloidal Silicon Dioxide","Unit Price (INR)":565.4,"Lead Time (Days)":8,"MOQ":20,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP003","Supplier Name":"Deccan Excipients Pvt Ltd","Material ID":"RM015","Material Name":"Colloidal Silicon Dioxide","Unit Price (INR)":621,"Lead Time (Days)":11,"MOQ":16,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP003","Supplier Name":"Deccan Excipients Pvt Ltd","Material ID":"RM016","Material Name":"Sodium Starch Glycolate","Unit Price (INR)":263.5,"Lead Time (Days)":12,"MOQ":25,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM016","Material Name":"Sodium Starch Glycolate","Unit Price (INR)":286,"Lead Time (Days)":14,"MOQ":20,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP003","Supplier Name":"Deccan Excipients Pvt Ltd","Material ID":"RM017","Material Name":"Pregelatinized Starch","Unit Price (INR)":93.1,"Lead Time (Days)":14,"MOQ":100,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM017","Material Name":"Pregelatinized Starch","Unit Price (INR)":101,"Lead Time (Days)":4,"MOQ":80,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP001","Supplier Name":"Arvind PharmaChem Pvt Ltd","Material ID":"RM018","Material Name":"Hydroxypropyl Methylcellulose","Unit Price (INR)":460,"Lead Time (Days)":14,"MOQ":25,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP003","Supplier Name":"Deccan Excipients Pvt Ltd","Material ID":"RM018","Material Name":"Hydroxypropyl Methylcellulose","Unit Price (INR)":505.2,"Lead Time (Days)":5,"MOQ":20,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP003","Supplier Name":"Deccan Excipients Pvt Ltd","Material ID":"RM019","Material Name":"Dextrose Anhydrous","Unit Price (INR)":61.3,"Lead Time (Days)":6,"MOQ":500,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM019","Material Name":"Dextrose Anhydrous","Unit Price (INR)":66.6,"Lead Time (Days)":8,"MOQ":400,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP003","Supplier Name":"Deccan Excipients Pvt Ltd","Material ID":"RM020","Material Name":"Sodium Chloride IP","Unit Price (INR)":31,"Lead Time (Days)":8,"MOQ":250,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM020","Material Name":"Sodium Chloride IP","Unit Price (INR)":33.7,"Lead Time (Days)":10,"MOQ":200,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM021","Material Name":"Purified Water","Unit Price (INR)":4.31,"Lead Time (Days)":11,"MOQ":2000,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP005","Supplier Name":"Saffron Liquid Ingredients LLP","Material ID":"RM021","Material Name":"Purified Water","Unit Price (INR)":4.68,"Lead Time (Days)":13,"MOQ":1600,"Quality Score":98,"Reliability Score":98,"Availability":"Unavailable"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM022","Material Name":"Sorbitol Solution 70%","Unit Price (INR)":69.8,"Lead Time (Days)":13,"MOQ":500,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP005","Supplier Name":"Saffron Liquid Ingredients LLP","Material ID":"RM022","Material Name":"Sorbitol Solution 70%","Unit Price (INR)":75.8,"Lead Time (Days)":3,"MOQ":400,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM023","Material Name":"Sucrose IP","Unit Price (INR)":47.1,"Lead Time (Days)":3,"MOQ":500,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP005","Supplier Name":"Saffron Liquid Ingredients LLP","Material ID":"RM023","Material Name":"Sucrose IP","Unit Price (INR)":49.3,"Lead Time (Days)":5,"MOQ":400,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM024","Material Name":"Glycerin IP","Unit Price (INR)":110.2,"Lead Time (Days)":5,"MOQ":200,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP005","Supplier Name":"Saffron Liquid Ingredients LLP","Material ID":"RM024","Material Name":"Glycerin IP","Unit Price (INR)":119.6,"Lead Time (Days)":7,"MOQ":160,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM025","Material Name":"Sodium Benzoate","Unit Price (INR)":150.4,"Lead Time (Days)":7,"MOQ":25,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP005","Supplier Name":"Saffron Liquid Ingredients LLP","Material ID":"RM025","Material Name":"Sodium Benzoate","Unit Price (INR)":163.1,"Lead Time (Days)":9,"MOQ":20,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM026","Material Name":"Citric Acid Monohydrate","Unit Price (INR)":90.3,"Lead Time (Days)":9,"MOQ":50,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP005","Supplier Name":"Saffron Liquid Ingredients LLP","Material ID":"RM026","Material Name":"Citric Acid Monohydrate","Unit Price (INR)":94.5,"Lead Time (Days)":11,"MOQ":40,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM027","Material Name":"Potassium Chloride IP","Unit Price (INR)":113.1,"Lead Time (Days)":11,"MOQ":50,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP005","Supplier Name":"Saffron Liquid Ingredients LLP","Material ID":"RM027","Material Name":"Potassium Chloride IP","Unit Price (INR)":122.7,"Lead Time (Days)":13,"MOQ":40,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM028","Material Name":"Sodium Citrate","Unit Price (INR)":101.9,"Lead Time (Days)":13,"MOQ":50,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP005","Supplier Name":"Saffron Liquid Ingredients LLP","Material ID":"RM028","Material Name":"Sodium Citrate","Unit Price (INR)":110.5,"Lead Time (Days)":3,"MOQ":40,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM029","Material Name":"Peppermint Flavour","Unit Price (INR)":667.5,"Lead Time (Days)":3,"MOQ":10,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP005","Supplier Name":"Saffron Liquid Ingredients LLP","Material ID":"RM029","Material Name":"Peppermint Flavour","Unit Price (INR)":698.7,"Lead Time (Days)":5,"MOQ":8,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP004","Supplier Name":"ChemPure Solutions India","Material ID":"RM030","Material Name":"Orange Flavour","Unit Price (INR)":622.9,"Lead Time (Days)":5,"MOQ":10,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP005","Supplier Name":"Saffron Liquid Ingredients LLP","Material ID":"RM030","Material Name":"Orange Flavour","Unit Price (INR)":676,"Lead Time (Days)":7,"MOQ":8,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP006","Supplier Name":"PackMed Films & Foils Pvt Ltd","Material ID":"RM031","Material Name":"Aluminium Foil","Unit Price (INR)":14183.7,"Lead Time (Days)":9,"MOQ":5,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP007","Supplier Name":"SecureDose Packaging Ltd","Material ID":"RM031","Material Name":"Aluminium Foil","Unit Price (INR)":15392,"Lead Time (Days)":11,"MOQ":4,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP006","Supplier Name":"PackMed Films & Foils Pvt Ltd","Material ID":"RM032","Material Name":"PVC Blister Film","Unit Price (INR)":8924,"Lead Time (Days)":11,"MOQ":5,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP007","Supplier Name":"SecureDose Packaging Ltd","Material ID":"RM032","Material Name":"PVC Blister Film","Unit Price (INR)":9682.8,"Lead Time (Days)":13,"MOQ":4,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP006","Supplier Name":"PackMed Films & Foils Pvt Ltd","Material ID":"RM033","Material Name":"Hard Gelatin Capsule Shells","Unit Price (INR)":0.41,"Lead Time (Days)":13,"MOQ":50000,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP007","Supplier Name":"SecureDose Packaging Ltd","Material ID":"RM033","Material Name":"Hard Gelatin Capsule Shells","Unit Price (INR)":0.43,"Lead Time (Days)":3,"MOQ":40000,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP005","Supplier Name":"Saffron Liquid Ingredients LLP","Material ID":"RM034","Material Name":"HDPE Bottle 100 mL","Unit Price (INR)":6.68,"Lead Time (Days)":14,"MOQ":5000,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP007","Supplier Name":"SecureDose Packaging Ltd","Material ID":"RM034","Material Name":"HDPE Bottle 100 mL","Unit Price (INR)":7.07,"Lead Time (Days)":5,"MOQ":4000,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP005","Supplier Name":"Saffron Liquid Ingredients LLP","Material ID":"RM035","Material Name":"Amber Glass Bottle 100 mL","Unit Price (INR)":12,"Lead Time (Days)":4,"MOQ":3000,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP007","Supplier Name":"SecureDose Packaging Ltd","Material ID":"RM035","Material Name":"Amber Glass Bottle 100 mL","Unit Price (INR)":13.2,"Lead Time (Days)":7,"MOQ":2400,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP006","Supplier Name":"PackMed Films & Foils Pvt Ltd","Material ID":"RM036","Material Name":"PP Closure 28 mm","Unit Price (INR)":1.62,"Lead Time (Days)":7,"MOQ":10000,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP007","Supplier Name":"SecureDose Packaging Ltd","Material ID":"RM036","Material Name":"PP Closure 28 mm","Unit Price (INR)":1.7,"Lead Time (Days)":9,"MOQ":8000,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP006","Supplier Name":"PackMed Films & Foils Pvt Ltd","Material ID":"RM037","Material Name":"Measuring Cup 10 mL","Unit Price (INR)":1.82,"Lead Time (Days)":9,"MOQ":5000,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP007","Supplier Name":"SecureDose Packaging Ltd","Material ID":"RM037","Material Name":"Measuring Cup 10 mL","Unit Price (INR)":1.98,"Lead Time (Days)":11,"MOQ":4000,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP006","Supplier Name":"PackMed Films & Foils Pvt Ltd","Material ID":"RM038","Material Name":"Printed Carton - Small","Unit Price (INR)":3.1,"Lead Time (Days)":11,"MOQ":10000,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP008","Supplier Name":"Apex Pharma Resources Ltd","Material ID":"RM038","Material Name":"Printed Carton - Small","Unit Price (INR)":3.29,"Lead Time (Days)":14,"MOQ":8000,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP006","Supplier Name":"PackMed Films & Foils Pvt Ltd","Material ID":"RM039","Material Name":"Product Label Roll","Unit Price (INR)":2748.6,"Lead Time (Days)":13,"MOQ":10,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP008","Supplier Name":"Apex Pharma Resources Ltd","Material ID":"RM039","Material Name":"Product Label Roll","Unit Price (INR)":2912,"Lead Time (Days)":4,"MOQ":8,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP006","Supplier Name":"PackMed Films & Foils Pvt Ltd","Material ID":"RM040","Material Name":"Laminated Sachet Film","Unit Price (INR)":12075.3,"Lead Time (Days)":3,"MOQ":5,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP007","Supplier Name":"SecureDose Packaging Ltd","Material ID":"RM040","Material Name":"Laminated Sachet Film","Unit Price (INR)":13104,"Lead Time (Days)":5,"MOQ":4,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP006","Supplier Name":"PackMed Films & Foils Pvt Ltd","Material ID":"RM041","Material Name":"Corrugated Shipper Box","Unit Price (INR)":36.9,"Lead Time (Days)":5,"MOQ":500,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP008","Supplier Name":"Apex Pharma Resources Ltd","Material ID":"RM041","Material Name":"Corrugated Shipper Box","Unit Price (INR)":39,"Lead Time (Days)":8,"MOQ":400,"Quality Score":88,"Reliability Score":86,"Availability":"Available"},{"Supplier ID":"SUP006","Supplier Name":"PackMed Films & Foils Pvt Ltd","Material ID":"RM042","Material Name":"Desiccant Sachet 1 g","Unit Price (INR)":0.74,"Lead Time (Days)":7,"MOQ":10000,"Quality Score":98,"Reliability Score":98,"Availability":"Available"},{"Supplier ID":"SUP007","Supplier Name":"SecureDose Packaging Ltd","Material ID":"RM042","Material Name":"Desiccant Sachet 1 g","Unit Price (INR)":0.77,"Lead Time (Days)":9,"MOQ":8000,"Quality Score":88,"Reliability Score":86,"Availability":"Available"}],"Inventory":[{"Material ID":"RM001","Material Name":"Paracetamol API","Current Stock":70,"Safety Stock":120,"Reorder Point":250,"Batch Number":"B260101-A","Manufacturing Date":"2025-03-01","Expiry Date":"2027-03-01"},{"Material ID":"RM002","Material Name":"Ibuprofen API","Current Stock":270,"Safety Stock":90,"Reorder Point":187.5,"Batch Number":"B260102-B","Manufacturing Date":"2025-03-02","Expiry Date":"2027-03-02"},{"Material ID":"RM003","Material Name":"Amoxicillin API","Current Stock":115,"Safety Stock":60,"Reorder Point":125,"Batch Number":"B260103-C","Manufacturing Date":"2024-08-18","Expiry Date":"2026-08-18"},{"Material ID":"RM004","Material Name":"Cetirizine Hydrochloride","Current Stock":42,"Safety Stock":12,"Reorder Point":25,"Batch Number":"B260104-D","Manufacturing Date":"2025-03-04","Expiry Date":"2027-03-04"},{"Material ID":"RM005","Material Name":"Ascorbic Acid","Current Stock":210,"Safety Stock":60,"Reorder Point":125,"Batch Number":"B260105-A","Manufacturing Date":"2025-03-05","Expiry Date":"2027-03-05"},{"Material ID":"RM006","Material Name":"Azithromycin Dihydrate","Current Stock":58,"Safety Stock":30,"Reorder Point":62.5,"Batch Number":"B260106-B","Manufacturing Date":"2025-03-06","Expiry Date":"2027-03-06"},{"Material ID":"RM007","Material Name":"Ferrous Fumarate","Current Stock":180,"Safety Stock":60,"Reorder Point":125,"Batch Number":"B260107-C","Manufacturing Date":"2025-03-07","Expiry Date":"2027-03-07"},{"Material ID":"RM008","Material Name":"Dextromethorphan Hydrobromide","Current Stock":20,"Safety Stock":6,"Reorder Point":12.5,"Batch Number":"B260108-D","Manufacturing Date":"2025-03-08","Expiry Date":"2027-03-08"},{"Material ID":"RM009","Material Name":"Lactose Monohydrate","Current Stock":590,"Safety Stock":300,"Reorder Point":625,"Batch Number":"B260109-A","Manufacturing Date":"2024-06-09","Expiry Date":"2027-06-09"},{"Material ID":"RM010","Material Name":"Microcrystalline Cellulose","Current Stock":850,"Safety Stock":240,"Reorder Point":500,"Batch Number":"B260110-B","Manufacturing Date":"2024-06-10","Expiry Date":"2027-06-10"},{"Material ID":"RM011","Material Name":"Povidone K30","Current Stock":175,"Safety Stock":60,"Reorder Point":125,"Batch Number":"B260111-C","Manufacturing Date":"2024-06-11","Expiry Date":"2027-06-11"},{"Material ID":"RM012","Material Name":"Croscarmellose Sodium","Current Stock":90,"Safety Stock":30,"Reorder Point":62.5,"Batch Number":"B260112-D","Manufacturing Date":"2024-06-12","Expiry Date":"2027-06-12"},{"Material ID":"RM013","Material Name":"Magnesium Stearate","Current Stock":100,"Safety Stock":30,"Reorder Point":62.5,"Batch Number":"B260113-A","Manufacturing Date":"2024-06-13","Expiry Date":"2027-06-13"},{"Material ID":"RM014","Material Name":"Talc Pharmaceutical Grade","Current Stock":420,"Safety Stock":120,"Reorder Point":250,"Batch Number":"B260114-B","Manufacturing Date":"2024-06-14","Expiry Date":"2027-06-14"},{"Material ID":"RM015","Material Name":"Colloidal Silicon Dioxide","Current Stock":46,"Safety Stock":24,"Reorder Point":50,"Batch Number":"B260115-C","Manufacturing Date":"2023-09-13","Expiry Date":"2026-09-12"},{"Material ID":"RM016","Material Name":"Sodium Starch Glycolate","Current Stock":90,"Safety Stock":30,"Reorder Point":62.5,"Batch Number":"B260116-D","Manufacturing Date":"2024-06-16","Expiry Date":"2027-06-16"},{"Material ID":"RM017","Material Name":"Pregelatinized Starch","Current Stock":360,"Safety Stock":120,"Reorder Point":250,"Batch Number":"B260117-A","Manufacturing Date":"2024-06-17","Expiry Date":"2027-06-17"},{"Material ID":"RM018","Material Name":"Hydroxypropyl Methylcellulose","Current Stock":98,"Safety Stock":30,"Reorder Point":62.5,"Batch Number":"B260118-B","Manufacturing Date":"2024-06-18","Expiry Date":"2027-06-18"},{"Material ID":"RM019","Material Name":"Dextrose Anhydrous","Current Stock":2100,"Safety Stock":600,"Reorder Point":1250,"Batch Number":"B260119-C","Manufacturing Date":"2025-03-19","Expiry Date":"2027-03-19"},{"Material ID":"RM020","Material Name":"Sodium Chloride IP","Current Stock":1125,"Safety Stock":300,"Reorder Point":625,"Batch Number":"B260120-D","Manufacturing Date":"2024-06-20","Expiry Date":"2027-06-20"},{"Material ID":"RM021","Material Name":"Purified Water","Current Stock":1800,"Safety Stock":2400,"Reorder Point":5000,"Batch Number":"B260121-A","Manufacturing Date":"2025-10-10","Expiry Date":"2026-10-10"},{"Material ID":"RM022","Material Name":"Sorbitol Solution 70%","Current Stock":1800,"Safety Stock":600,"Reorder Point":1250,"Batch Number":"B260122-B","Manufacturing Date":"2025-03-22","Expiry Date":"2027-03-22"},{"Material ID":"RM023","Material Name":"Sucrose IP","Current Stock":1950,"Safety Stock":600,"Reorder Point":1250,"Batch Number":"B260123-C","Manufacturing Date":"2025-03-23","Expiry Date":"2027-03-23"},{"Material ID":"RM024","Material Name":"Glycerin IP","Current Stock":825,"Safety Stock":240,"Reorder Point":500,"Batch Number":"B260124-D","Manufacturing Date":"2024-06-24","Expiry Date":"2027-06-24"},{"Material ID":"RM025","Material Name":"Sodium Benzoate","Current Stock":112,"Safety Stock":30,"Reorder Point":62.5,"Batch Number":"B260125-A","Manufacturing Date":"2024-06-25","Expiry Date":"2027-06-25"},{"Material ID":"RM026","Material Name":"Citric Acid Monohydrate","Current Stock":165,"Safety Stock":60,"Reorder Point":125,"Batch Number":"B260126-B","Manufacturing Date":"2024-06-01","Expiry Date":"2027-06-01"},{"Material ID":"RM027","Material Name":"Potassium Chloride IP","Current Stock":180,"Safety Stock":60,"Reorder Point":125,"Batch Number":"B260127-C","Manufacturing Date":"2024-06-02","Expiry Date":"2027-06-02"},{"Material ID":"RM028","Material Name":"Sodium Citrate","Current Stock":195,"Safety Stock":60,"Reorder Point":125,"Batch Number":"B260128-D","Manufacturing Date":"2024-06-03","Expiry Date":"2027-06-03"},{"Material ID":"RM029","Material Name":"Peppermint Flavour","Current Stock":42,"Safety Stock":12,"Reorder Point":25,"Batch Number":"B260129-A","Manufacturing Date":"2025-03-04","Expiry Date":"2027-03-04"},{"Material ID":"RM030","Material Name":"Orange Flavour","Current Stock":45,"Safety Stock":12,"Reorder Point":25,"Batch Number":"B260130-B","Manufacturing Date":"2025-03-05","Expiry Date":"2027-03-05"},{"Material ID":"RM031","Material Name":"Aluminium Foil","Current Stock":3,"Safety Stock":6,"Reorder Point":13,"Batch Number":"B260131-C","Manufacturing Date":"2023-01-06","Expiry Date":"2028-01-05"},{"Material ID":"RM032","Material Name":"PVC Blister Film","Current Stock":19,"Safety Stock":6,"Reorder Point":13,"Batch Number":"B260132-D","Manufacturing Date":"2024-06-07","Expiry Date":"2027-06-07"},{"Material ID":"RM033","Material Name":"Hard Gelatin Capsule Shells","Current Stock":235000,"Safety Stock":75000,"Reorder Point":150000,"Batch Number":"B260133-A","Manufacturing Date":"2024-06-08","Expiry Date":"2027-06-08"},{"Material ID":"RM034","Material Name":"HDPE Bottle 100 mL","Current Stock":25000,"Safety Stock":7500,"Reorder Point":15000,"Batch Number":"B260134-B","Manufacturing Date":"2021-10-29","Expiry Date":"2026-10-28"},{"Material ID":"RM035","Material Name":"Amber Glass Bottle 100 mL","Current Stock":8500,"Safety Stock":4500,"Reorder Point":9000,"Batch Number":"B260135-C","Manufacturing Date":"2023-01-10","Expiry Date":"2028-01-09"},{"Material ID":"RM036","Material Name":"PP Closure 28 mm","Current Stock":42000,"Safety Stock":15000,"Reorder Point":30000,"Batch Number":"B260136-D","Manufacturing Date":"2023-01-11","Expiry Date":"2028-01-10"},{"Material ID":"RM037","Material Name":"Measuring Cup 10 mL","Current Stock":22000,"Safety Stock":7500,"Reorder Point":15000,"Batch Number":"B260137-A","Manufacturing Date":"2023-01-12","Expiry Date":"2028-01-11"},{"Material ID":"RM038","Material Name":"Printed Carton - Small","Current Stock":47000,"Safety Stock":15000,"Reorder Point":30000,"Batch Number":"B260138-B","Manufacturing Date":"2024-06-13","Expiry Date":"2027-06-13"},{"Material ID":"RM039","Material Name":"Product Label Roll","Current Stock":42,"Safety Stock":12,"Reorder Point":25,"Batch Number":"B260139-C","Manufacturing Date":"2024-06-14","Expiry Date":"2027-06-14"},{"Material ID":"RM040","Material Name":"Laminated Sachet Film","Current Stock":23,"Safety Stock":6,"Reorder Point":13,"Batch Number":"B260140-D","Manufacturing Date":"2024-06-15","Expiry Date":"2027-06-15"},{"Material ID":"RM041","Material Name":"Corrugated Shipper Box","Current Stock":2100,"Safety Stock":750,"Reorder Point":1500,"Batch Number":"B260141-A","Manufacturing Date":"2024-06-16","Expiry Date":"2027-06-16"},{"Material ID":"RM042","Material Name":"Desiccant Sachet 1 g","Current Stock":43000,"Safety Stock":15000,"Reorder Point":30000,"Batch Number":"B260142-B","Manufacturing Date":"2024-06-17","Expiry Date":"2027-06-17"}],"Consumption History":[{"Date":"2026-07-03","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":96},{"Date":"2026-07-03","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":76.8},{"Date":"2026-07-03","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":66.8},{"Date":"2026-07-03","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":188},{"Date":"2026-07-03","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.6},{"Date":"2026-07-03","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2195},{"Date":"2026-07-04","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":96.7},{"Date":"2026-07-04","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":74.9},{"Date":"2026-07-04","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":62.8},{"Date":"2026-07-04","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":182.5},{"Date":"2026-07-04","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.5},{"Date":"2026-07-04","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2115},{"Date":"2026-07-05","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":96.6},{"Date":"2026-07-05","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":77.4},{"Date":"2026-07-05","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":65.9},{"Date":"2026-07-05","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":186.5},{"Date":"2026-07-05","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.7},{"Date":"2026-07-05","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2210},{"Date":"2026-07-06","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":97.3},{"Date":"2026-07-06","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":75.6},{"Date":"2026-07-06","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":63.9},{"Date":"2026-07-06","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":184},{"Date":"2026-07-06","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.6},{"Date":"2026-07-06","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2100},{"Date":"2026-07-07","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":97.4},{"Date":"2026-07-07","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":76.2},{"Date":"2026-07-07","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":67.5},{"Date":"2026-07-07","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":187},{"Date":"2026-07-07","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.7},{"Date":"2026-07-07","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2175},{"Date":"2026-07-08","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":97.9},{"Date":"2026-07-08","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":75.1},{"Date":"2026-07-08","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":64.5},{"Date":"2026-07-08","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":182},{"Date":"2026-07-08","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.7},{"Date":"2026-07-08","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2130},{"Date":"2026-07-09","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":98.6},{"Date":"2026-07-09","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":76.8},{"Date":"2026-07-09","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":66.2},{"Date":"2026-07-09","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":188},{"Date":"2026-07-09","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.6},{"Date":"2026-07-09","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2195},{"Date":"2026-07-10","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":98.5},{"Date":"2026-07-10","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":74.9},{"Date":"2026-07-10","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":66.8},{"Date":"2026-07-10","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":182.5},{"Date":"2026-07-10","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.8},{"Date":"2026-07-10","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2115},{"Date":"2026-07-11","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":99.2},{"Date":"2026-07-11","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":77.4},{"Date":"2026-07-11","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":62.8},{"Date":"2026-07-11","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":186.5},{"Date":"2026-07-11","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.6},{"Date":"2026-07-11","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2210},{"Date":"2026-07-12","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":99.3},{"Date":"2026-07-12","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":75.6},{"Date":"2026-07-12","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":65.9},{"Date":"2026-07-12","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":184},{"Date":"2026-07-12","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.8},{"Date":"2026-07-12","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2100},{"Date":"2026-07-13","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":99.8},{"Date":"2026-07-13","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":76.2},{"Date":"2026-07-13","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":63.9},{"Date":"2026-07-13","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":187},{"Date":"2026-07-13","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.8},{"Date":"2026-07-13","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2175},{"Date":"2026-07-14","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":100.5},{"Date":"2026-07-14","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":75.1},{"Date":"2026-07-14","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":67.5},{"Date":"2026-07-14","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":182},{"Date":"2026-07-14","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.7},{"Date":"2026-07-14","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2130},{"Date":"2026-07-15","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":100.4},{"Date":"2026-07-15","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":76.8},{"Date":"2026-07-15","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":64.5},{"Date":"2026-07-15","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":188},{"Date":"2026-07-15","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.9},{"Date":"2026-07-15","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2195},{"Date":"2026-07-16","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":101.1},{"Date":"2026-07-16","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":74.9},{"Date":"2026-07-16","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":66.2},{"Date":"2026-07-16","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":182.5},{"Date":"2026-07-16","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.7},{"Date":"2026-07-16","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2115},{"Date":"2026-07-17","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":101.2},{"Date":"2026-07-17","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":77.4},{"Date":"2026-07-17","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":66.8},{"Date":"2026-07-17","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":186.5},{"Date":"2026-07-17","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.8},{"Date":"2026-07-17","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2210},{"Date":"2026-07-18","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":101.7},{"Date":"2026-07-18","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":75.6},{"Date":"2026-07-18","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":62.8},{"Date":"2026-07-18","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":184},{"Date":"2026-07-18","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.9},{"Date":"2026-07-18","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2100},{"Date":"2026-07-19","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":102.4},{"Date":"2026-07-19","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":76.2},{"Date":"2026-07-19","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":65.9},{"Date":"2026-07-19","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":187},{"Date":"2026-07-19","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.8},{"Date":"2026-07-19","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2175},{"Date":"2026-07-20","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":102.3},{"Date":"2026-07-20","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":75.1},{"Date":"2026-07-20","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":63.9},{"Date":"2026-07-20","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":182},{"Date":"2026-07-20","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":6},{"Date":"2026-07-20","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2130},{"Date":"2026-07-21","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":103},{"Date":"2026-07-21","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":76.8},{"Date":"2026-07-21","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":67.5},{"Date":"2026-07-21","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":188},{"Date":"2026-07-21","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.8},{"Date":"2026-07-21","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2195},{"Date":"2026-07-22","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":103.1},{"Date":"2026-07-22","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":74.9},{"Date":"2026-07-22","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":64.5},{"Date":"2026-07-22","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":182.5},{"Date":"2026-07-22","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.9},{"Date":"2026-07-22","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2115},{"Date":"2026-07-23","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":103.6},{"Date":"2026-07-23","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":77.4},{"Date":"2026-07-23","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":66.2},{"Date":"2026-07-23","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":186.5},{"Date":"2026-07-23","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":6},{"Date":"2026-07-23","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2210},{"Date":"2026-07-24","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":104.3},{"Date":"2026-07-24","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":75.6},{"Date":"2026-07-24","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":66.8},{"Date":"2026-07-24","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":184},{"Date":"2026-07-24","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.8},{"Date":"2026-07-24","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2100},{"Date":"2026-07-25","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":104.2},{"Date":"2026-07-25","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":76.2},{"Date":"2026-07-25","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":62.8},{"Date":"2026-07-25","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":187},{"Date":"2026-07-25","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":6.1},{"Date":"2026-07-25","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2175},{"Date":"2026-07-26","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":104.9},{"Date":"2026-07-26","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":75.1},{"Date":"2026-07-26","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":65.9},{"Date":"2026-07-26","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":182},{"Date":"2026-07-26","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.9},{"Date":"2026-07-26","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2130},{"Date":"2026-07-27","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":105},{"Date":"2026-07-27","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":76.8},{"Date":"2026-07-27","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":63.9},{"Date":"2026-07-27","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":188},{"Date":"2026-07-27","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":6},{"Date":"2026-07-27","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2195},{"Date":"2026-07-28","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":105.5},{"Date":"2026-07-28","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":74.9},{"Date":"2026-07-28","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":67.5},{"Date":"2026-07-28","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":182.5},{"Date":"2026-07-28","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":6.1},{"Date":"2026-07-28","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2115},{"Date":"2026-07-29","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":106.2},{"Date":"2026-07-29","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":77.4},{"Date":"2026-07-29","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":64.5},{"Date":"2026-07-29","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":186.5},{"Date":"2026-07-29","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":5.9},{"Date":"2026-07-29","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2210},{"Date":"2026-07-30","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":106.1},{"Date":"2026-07-30","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":75.6},{"Date":"2026-07-30","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":66.2},{"Date":"2026-07-30","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":184},{"Date":"2026-07-30","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":6.2},{"Date":"2026-07-30","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2100},{"Date":"2026-07-31","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":106.8},{"Date":"2026-07-31","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":76.2},{"Date":"2026-07-31","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":66.8},{"Date":"2026-07-31","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":187},{"Date":"2026-07-31","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":6},{"Date":"2026-07-31","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2175},{"Date":"2026-08-01","Material ID":"RM001","Material Name":"Paracetamol API","Quantity Consumed":106.9},{"Date":"2026-08-01","Material ID":"RM002","Material Name":"Ibuprofen API","Quantity Consumed":75.1},{"Date":"2026-08-01","Material ID":"RM003","Material Name":"Amoxicillin API","Quantity Consumed":62.8},{"Date":"2026-08-01","Material ID":"RM009","Material Name":"Lactose Monohydrate","Quantity Consumed":182},{"Date":"2026-08-01","Material ID":"RM031","Material Name":"Aluminium Foil","Quantity Consumed":6.1},{"Date":"2026-08-01","Material ID":"RM021","Material Name":"Purified Water","Quantity Consumed":2130}]};
+
+const DEFAULT_RULES = {
+  near_expiry_threshold_days: 30, critical_expiry_threshold_days: 7, safety_stock_buffer_pct: 20,
+  inventory_health_threshold_pct: 90, reorder_point_buffer_pct: 10, emergency_supplier_lead_time_days: 5,
+  default_procurement_qty_multiplier: 2, reliability_weight_pct: 40, quality_weight_pct: 30,
+  unit_price_weight_pct: 20, lead_time_weight_pct: 10, forecast_window_days: 90
+};
+const CRITICALITY_BONUS = { HIGH: 15, MEDIUM: 7, LOW: 0 };
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function classifyInventory(row, rules) {
+  let status = "Healthy";
+  if (row.current_stock <= row.safety_stock) status = "Critical";
+  else if (row.current_stock <= row.reorder_point) status = "Low";
+  const stockoutRisk = row.current_stock <= row.reorder_point;
+  let daysToExpiry = null, expiryStatus = "OK";
+  if (row.expiry_date) {
+    daysToExpiry = Math.round((new Date(row.expiry_date) - new Date()) / DAY_MS);
+    if (daysToExpiry <= rules.critical_expiry_threshold_days) expiryStatus = "Critical";
+    else if (daysToExpiry <= rules.near_expiry_threshold_days) expiryStatus = "Warning";
+  }
+  return { ...row, status, stockoutRisk, daysToExpiry, expiryStatus };
+}
+
+function normalize(value, min, max, invert) {
+  if (max === min) return 1;
+  const n = (value - min) / (max - min);
+  return invert ? 1 - n : n;
+}
+
+function scoreSuppliers(materialId, suppliersAll, rules) {
+  const suppliers = suppliersAll.filter((s) => s.material_id === materialId);
+  if (suppliers.length === 0) return [];
+  const prices = suppliers.map((s) => s.unit_price), leads = suppliers.map((s) => s.lead_time_days);
+  const priceMin = Math.min(...prices), priceMax = Math.max(...prices);
+  const leadMin = Math.min(...leads), leadMax = Math.max(...leads);
+  const wR = rules.reliability_weight_pct / 100, wQ = rules.quality_weight_pct / 100;
+  const wP = rules.unit_price_weight_pct / 100, wL = rules.lead_time_weight_pct / 100;
+  const scored = suppliers.map((s) => {
+    const priceScore = normalize(s.unit_price, priceMin, priceMax, true);
+    const leadScore = normalize(s.lead_time_days, leadMin, leadMax, true);
+    const composite = wR * (s.reliability_score / 100) + wQ * (s.quality_score / 100) + wP * priceScore + wL * leadScore;
+    return { ...s, compositeScore: Math.round(composite * 1000) / 10 };
+  });
+  scored.sort((a, b) => b.compositeScore - a.compositeScore);
+  return scored;
+}
+
+function supplierRecommendation(materialId, suppliersAll, rules) {
+  const ranked = scoreSuppliers(materialId, suppliersAll, rules);
+  if (ranked.length === 0) return { primary: null, emergency: null };
+  const available = ranked.filter((s) => s.availability === "Available");
+  const primary = available[0] || ranked[0];
+  const rest = ranked.filter((s) => s.supplier_id !== primary.supplier_id);
+  const emergency = rest.find((s) => s.availability === "Available") || rest[0] || null;
+  return { primary, emergency };
+}
+
+function materialForecast(materialId, consumptionAll, inventoryEnrichedById) {
+  const history = consumptionAll.filter((c) => c.Material_ID === materialId).sort((a, b) => (a.date < b.date ? -1 : 1));
+  const inv = inventoryEnrichedById[materialId];
+  if (history.length === 0 || !inv) return { hasData: false, history: [], inventory: inv || null };
+  const totalQty = history.reduce((s, r) => s + r.qty, 0);
+  const firstDate = new Date(history[0].date), lastDate = new Date(history[history.length - 1].date);
+  const observedDays = Math.max(1, Math.round((lastDate - firstDate) / DAY_MS) + 1);
+  const avgDaily = totalQty / observedDays;
+  const mean = avgDaily;
+  const variance = history.reduce((s, r) => s + Math.pow(r.qty - mean, 2), 0) / history.length;
+  const cv = mean > 0 ? Math.sqrt(variance) / mean : 1;
+  let confidence = "Low";
+  if (history.length >= 14 && cv < 0.15) confidence = "High";
+  else if (history.length >= 7 && cv < 0.35) confidence = "Medium";
+  const currentStock = inv.current_stock;
+  const daysRemaining = avgDaily > 0 ? currentStock / avgDaily : Infinity;
+  const today = new Date();
+  const predictedStockoutDate = avgDaily > 0 ? new Date(today.getTime() + daysRemaining * DAY_MS) : null;
+  return {
+    hasData: true, avgDailyConsumption: Math.round(avgDaily * 100) / 100, observedWindowDays: observedDays,
+    forecastConfidence: confidence, daysOfInventoryRemaining: daysRemaining === Infinity ? null : Math.round(daysRemaining * 10) / 10,
+    predictedStockoutDate: predictedStockoutDate ? predictedStockoutDate.toISOString().slice(0, 10) : null,
+    predictedConsumption: {
+      next30: Math.round(avgDaily * 30 * 100) / 100, next60: Math.round(avgDaily * 60 * 100) / 100, next90: Math.round(avgDaily * 90 * 100) / 100
+    },
+    currentStock, reorderPoint: inv.reorder_point, safetyStock: inv.safety_stock, history
+  };
+}
+
+function useComputed(rules, inventoryOverrides, purchaseOrders) {
+  return useMemo(() => {
+    const materials = RAW["Materials"].map((m) => ({
+      material_id: m["Material ID"], material_name: m["Material Name"], category: m["Category"],
+      unit: m["Unit"], shelf_life_days: m["Shelf Life (Days)"], criticality: m["Criticality"]
+    }));
+    const materialsById = Object.fromEntries(materials.map((m) => [m.material_id, m]));
+    const inventoryRaw = RAW["Inventory"].map((r, i) => {
+      const id = i + 1;
+      const override = inventoryOverrides[id] || {};
+      return {
+        id, material_id: r["Material ID"],
+        current_stock: override.current_stock ?? r["Current Stock"],
+        safety_stock: override.safety_stock ?? r["Safety Stock"],
+        reorder_point: override.reorder_point ?? r["Reorder Point"],
+        batch_number: r["Batch Number"], mfg_date: r["Manufacturing Date"], expiry_date: r["Expiry Date"]
+      };
+    });
+    const suppliersRaw = RAW["Supplier Catalog"].map((s, i) => ({
+      id: i + 1, supplier_id: s["Supplier ID"], supplier_name: s["Supplier Name"], material_id: s["Material ID"],
+      unit_price: s["Unit Price (INR)"], lead_time_days: s["Lead Time (Days)"], moq: s["MOQ"],
+      quality_score: s["Quality Score"], reliability_score: s["Reliability Score"], availability: s["Availability"]
+    }));
+    const consumptionRaw = RAW["Consumption History"].map((c) => ({ date: c["Date"], Material_ID: c["Material ID"], qty: c["Quantity Consumed"] }));
+    const products = RAW["Products"].map((p) => ({ product_id: p["Product ID"], product_name: p["Product Name"], category: p["Category"], dosage_form: p["Dosage Form"] }));
+
+    const enrichedInventory = inventoryRaw.map((r) => classifyInventory({ ...r, ...materialsById[r.material_id] }, rules)).sort((a, b) => a.material_name.localeCompare(b.material_name));
+    const inventoryEnrichedById = Object.fromEntries(enrichedInventory.map((r) => [r.material_id, r]));
+
+    const needsProcurement = enrichedInventory.filter((r) => r.stockoutRisk);
+    const recommendations = needsProcurement.map((item) => {
+      const { primary, emergency } = supplierRecommendation(item.material_id, suppliersRaw, rules);
+      const forecast = materialForecast(item.material_id, consumptionRaw, inventoryEnrichedById);
+      let recQty = Math.max(0, Math.round((item.safety_stock * rules.default_procurement_qty_multiplier - item.current_stock) * 100) / 100);
+      if (primary && primary.moq && recQty < primary.moq) recQty = primary.moq;
+      const shortfallRatio = item.reorder_point > 0 ? Math.max(0, (item.reorder_point - item.current_stock) / item.reorder_point) : 0;
+      const priorityScore = Math.round((shortfallRatio * 100 + (CRITICALITY_BONUS[item.criticality] || 0)) * 10) / 10;
+      let reason = "Below reorder point";
+      if (item.status === "Critical") reason = "Below safety stock";
+      else if (primary && primary.reliability_score >= 95) reason = "Highest reliability";
+      return {
+        materialId: item.material_id, materialName: item.material_name, unit: item.unit, criticality: item.criticality,
+        currentStock: item.current_stock, safetyStock: item.safety_stock, reorderPoint: item.reorder_point,
+        recommendedQty: recQty, priorityScore, isHighPriority: priorityScore >= 50, reason,
+        primarySupplier: primary ? { name: primary.supplier_name, leadTimeDays: primary.lead_time_days, moq: primary.moq, unitPrice: primary.unit_price } : null,
+        emergencySupplier: emergency ? { name: emergency.supplier_name, leadTimeDays: emergency.lead_time_days, moq: emergency.moq, unitPrice: emergency.unit_price } : null,
+        estimatedCost: primary ? Math.round(primary.unit_price * recQty * 100) / 100 : null,
+        predictedStockoutDate: forecast.hasData ? forecast.predictedStockoutDate : null
+      };
+    }).sort((a, b) => b.priorityScore - a.priorityScore);
+
+    const nearExpiry = enrichedInventory.filter((r) => r.expiryStatus !== "OK");
+    const healthyCount = enrichedInventory.filter((r) => r.status !== "Critical").length;
+    const inventoryHealthPct = Math.round((healthyCount / enrichedInventory.length) * 1000) / 10;
+
+    const uniqueSupplierNames = [...new Set(suppliersRaw.map((s) => s.supplier_name))];
+    let highestReliability = null, fastestLeadTime = null, lowestMoq = null;
+    const flaggedNames = new Set();
+    for (const s of suppliersRaw) {
+      if (!highestReliability || s.reliability_score > highestReliability.reliability_score) highestReliability = s;
+      if (!fastestLeadTime || s.lead_time_days < fastestLeadTime.lead_time_days) fastestLeadTime = s;
+      if (!lowestMoq || s.moq < lowestMoq.moq) lowestMoq = s;
+      if (s.reliability_score < 80 || s.lead_time_days > 10 || s.availability !== "Available") flaggedNames.add(s.supplier_name);
+    }
+    let materialsWithBackup = 0;
+    for (const m of materials) { const { emergency } = supplierRecommendation(m.material_id, suppliersRaw, rules); if (emergency) materialsWithBackup += 1; }
+
+    const priceByMaterial = {};
+    for (const s of suppliersRaw) { if (!(s.material_id in priceByMaterial) || s.unit_price < priceByMaterial[s.material_id]) priceByMaterial[s.material_id] = s.unit_price; }
+    const totalInventoryValue = enrichedInventory.reduce((sum, r) => sum + r.current_stock * (priceByMaterial[r.material_id] || 0), 0);
+    const consumptionValue = consumptionRaw.reduce((sum, c) => sum + c.qty * (priceByMaterial[c.Material_ID] || 0), 0);
+    const inventoryTurnover = totalInventoryValue > 0 ? Math.round((consumptionValue / totalInventoryValue) * 100) / 100 : 0;
+    const estimatedSpend = recommendations.reduce((s, r) => s + (r.estimatedCost || 0), 0);
+
+    return {
+      materials, products, inventoryRaw, suppliersRaw, consumptionRaw, enrichedInventory, inventoryEnrichedById,
+      recommendations, nearExpiry, inventoryHealthPct,
+      supplierInsights: { totalSuppliers: uniqueSupplierNames.length, highestReliability, fastestLeadTime, lowestMoq, flaggedCount: flaggedNames.size, emergencyCoverage: { covered: materialsWithBackup, total: materials.length } },
+      quickKpis: { totalProducts: products.length, totalMaterials: materials.length, activeSuppliers: uniqueSupplierNames.length, openPurchaseOrders: purchaseOrders.filter((po) => po.status === "Pending").length, inventoryTurnover },
+      totalInventoryValue: Math.round(totalInventoryValue * 100) / 100, estimatedSpend: Math.round(estimatedSpend * 100) / 100,
+      highPriorityCount: recommendations.filter((r) => r.isHighPriority).length, highestPriorityMaterial: recommendations[0] || null,
+      earliestStockout: recommendations.filter((r) => r.predictedStockoutDate).sort((a, b) => (a.predictedStockoutDate < b.predictedStockoutDate ? -1 : 1))[0] || null
+    };
+  }, [rules, inventoryOverrides, purchaseOrders]);
+}
+
+const inr = (n) => (n == null ? "—" : `₹${Number(n).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`);
+const STATUS_COLOR = { Healthy: "#3d7a5c", Low: "#b9762b", Critical: "#a63a2e", OK: "#3d7a5c", Warning: "#b9762b", Available: "#3d7a5c", Unavailable: "#a63a2e", Pending: "#b9762b", Approved: "#3d7a5c" };
+
+function Dot({ label }) {
+  const c = STATUS_COLOR[label] || "#8fa0a4";
+  return <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5 }}><span style={{ width: 7, height: 7, borderRadius: 999, background: c, display: "inline-block" }} />{label}</span>;
+}
+function Kpi({ label, value, color }) {
+  return <div style={{ flex: 1, padding: "16px 22px", borderRight: "1px solid var(--line)" }}>
+    <div style={{ fontSize: 12, color: "var(--ink-soft)", marginBottom: 6 }}>{label}</div>
+    <div style={{ fontFamily: "var(--font-mono)", fontSize: 26, fontWeight: 600, color: color || "var(--ink)" }}>{value}</div>
+  </div>;
+}
+function KpiStrip({ children }) { return <div style={{ display: "flex", borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)", marginBottom: 28, flexWrap: "wrap" }}>{children}</div>; }
+function Panel({ children, style }) { return <div style={{ border: "1px solid var(--line)", background: "#fff", ...style }}>{children}</div>; }
+function SectionHead({ title, hint }) {
+  return <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 6 }}>
+    <h2 style={{ fontSize: 16, fontFamily: "var(--font-display)", margin: 0, fontWeight: 600 }}>{title}</h2>
+    {hint && <span style={{ fontSize: 12.5, color: "var(--ink-soft)" }}>{hint}</span>}
+  </div>;
+}
+
+const th = { textAlign: "left", fontWeight: 500, fontSize: 11.5, color: "var(--ink-soft)", padding: "9px 14px", borderBottom: "1px solid var(--line)", whiteSpace: "nowrap" };
+const td = { padding: "10px 14px", borderBottom: "1px solid var(--line-soft)", verticalAlign: "middle", whiteSpace: "nowrap", fontSize: 13 };
+const tdNum = { ...td, fontFamily: "var(--font-mono)", textAlign: "right" };
+function rowStyle(kind) {
+  if (kind === "critical") return { boxShadow: "inset 3px 0 0 #a63a2e" };
+  if (kind === "warning") return { boxShadow: "inset 3px 0 0 #b9762b" };
+  if (kind === "healthy") return { boxShadow: "inset 3px 0 0 #3d7a5c" };
+  return {};
+}
+const inputStyle = { fontSize: 13, padding: "7px 10px", border: "1px solid var(--line)", borderRadius: 3, background: "#fff", color: "var(--ink)", fontFamily: "var(--font-body)" };
+function btnSecondary(disabled) {
+  return { fontSize: 13, padding: "7px 14px", border: "1px solid var(--line)", background: "transparent", color: "var(--ink)", borderRadius: 3, cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.45 : 1, fontFamily: "var(--font-body)" };
+}
+const btnPrimary = { fontSize: 13, padding: "7px 14px", border: "1px solid var(--ink)", background: "var(--ink)", color: "#fff", borderRadius: 3, cursor: "pointer", fontFamily: "var(--font-body)" };
+
+/* Small hand-rolled SVG line chart — no external chart library needed */
+function TrendChart({ data }) {
+  const w = 640, h = 220, padL = 34, padB = 24, padT = 10, padR = 10;
+  if (!data || data.length === 0) return null;
+  const values = data.map((d) => d.qty);
+  const min = Math.min(...values, 0), max = Math.max(...values);
+  const innerW = w - padL - padR, innerH = h - padT - padB;
+  const x = (i) => padL + (i / Math.max(1, data.length - 1)) * innerW;
+  const y = (v) => padT + innerH - ((v - min) / Math.max(1e-6, max - min)) * innerH;
+  const path = data.map((d, i) => `${i === 0 ? "M" : "L"} ${x(i).toFixed(1)} ${y(d.qty).toFixed(1)}`).join(" ");
+  const step = Math.max(1, Math.floor(data.length / 8));
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} width="100%" style={{ display: "block" }}>
+      {[0, 0.25, 0.5, 0.75, 1].map((f) => (
+        <line key={f} x1={padL} x2={w - padR} y1={padT + innerH * f} y2={padT + innerH * f} stroke="#e9ede9" strokeWidth="1" />
+      ))}
+      <path d={path} fill="none" stroke="#0f7f82" strokeWidth="2" />
+      {data.map((d, i) => (i % step === 0 ? <text key={i} x={x(i)} y={h - 6} fontSize="10" fill="#5a6b70" textAnchor="middle">{d.date}</text> : null))}
+      <text x={padL - 6} y={y(max) + 4} fontSize="10" fill="#5a6b70" textAnchor="end">{Math.round(max)}</text>
+      <text x={padL - 6} y={y(min) + 4} fontSize="10" fill="#5a6b70" textAnchor="end">{Math.round(min)}</text>
+    </svg>
+  );
+}
+
+const IconGrid = () => (<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="2.5" y="2.5" width="6" height="6" /><rect x="11.5" y="2.5" width="6" height="6" /><rect x="2.5" y="11.5" width="6" height="6" /><rect x="11.5" y="11.5" width="6" height="6" /></svg>);
+const IconBox = () => (<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 6L10 2.5 17.5 6 10 9.5 2.5 6Z" /><path d="M2.5 6v8L10 17.5 17.5 14V6" /><path d="M10 9.5v8" /></svg>);
+const IconCart = () => (<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 3h2l1.6 9.4a1.5 1.5 0 001.5 1.3h6.6a1.5 1.5 0 001.5-1.2L17 6.5H5.3" /><circle cx="8" cy="17" r="1" /><circle cx="14.5" cy="17" r="1" /></svg>);
+const IconTruck = () => (<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5.5" width="9" height="7" /><path d="M11 8h3.5L17 10.5V12.5H11z" /><circle cx="6" cy="14.5" r="1.4" /><circle cx="14" cy="14.5" r="1.4" /></svg>);
+const IconTrend = () => (<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 15L7.5 9l3.5 3 6.5-7.5" /><path d="M14 4.5h3.5V8" /></svg>);
+const IconSettings = () => (<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="10" cy="10" r="2.6" /><path d="M10 2.8v2.1M10 15.1v2.1M17.2 10h-2.1M4.9 10H2.8M15.1 4.9l-1.5 1.5M6.4 13.6l-1.5 1.5M15.1 15.1l-1.5-1.5M6.4 6.4L4.9 4.9" /></svg>);
+
+const NAV = [
+  { section: "Operations", items: [
+    { key: "dashboard", label: "Dashboard", icon: IconGrid },
+    { key: "inventory", label: "Inventory", icon: IconBox },
+    { key: "procurement", label: "Procurement", icon: IconCart },
+    { key: "suppliers", label: "Suppliers", icon: IconTruck }
+  ]},
+  { section: "Intelligence", items: [{ key: "forecasting", label: "Forecasting", icon: IconTrend }] },
+  { section: "System", items: [{ key: "settings", label: "Business Rules", icon: IconSettings }] }
+];
+
+function Sidebar({ active, onChange, mobileOpen, setMobileOpen }) {
+  return (
+    <aside style={{
+      width: 240, flexShrink: 0, background: "#0d2229", color: "#cfe0df", display: "flex", flexDirection: "column",
+      padding: "22px 0 18px", height: "100%", position: mobileOpen ? "fixed" : "static", zIndex: 20, left: 0, top: 0,
+      transform: mobileOpen === false ? "translateX(-100%)" : "none"
+    }} className="sidebar">
+      <div style={{ padding: "0 22px 22px", borderBottom: "1px solid rgba(255,255,255,0.08)", marginBottom: 18 }}>
+        <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, color: "#fff" }}>PIDIP</div>
+        <div style={{ fontSize: 11.5, color: "#7fa09d", marginTop: 4, lineHeight: 1.4 }}>Procurement &amp; Inventory<br />Decision Intelligence</div>
+      </div>
+      {NAV.map((group) => (
+        <div key={group.section} style={{ padding: "0 14px", marginBottom: 6 }}>
+          <div style={{ fontSize: 11, color: "#7fa09d", padding: "10px 8px 6px" }}>{group.section}</div>
+          {group.items.map((item) => {
+            const Icon = item.icon; const isActive = active === item.key;
+            return (
+              <button key={item.key} onClick={() => { onChange(item.key); if (setMobileOpen) setMobileOpen(false); }} style={{
+                display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", padding: "9px 10px", borderRadius: 3,
+                color: isActive ? "#fff" : "#cfe0df", background: isActive ? "#133339" : "transparent", border: "none",
+                borderLeft: isActive ? "2px solid #0f7f82" : "2px solid transparent", fontSize: 13.5, marginBottom: 1, cursor: "pointer", fontFamily: "var(--font-body)"
+              }}><Icon /> {item.label}</button>
+            );
+          })}
+        </div>
+      ))}
+      <div style={{ marginTop: "auto", padding: "14px 22px 0", borderTop: "1px solid rgba(255,255,255,0.08)", fontSize: 11, color: "#7fa09d" }}>
+        NovaLife Pharmaceuticals Pvt. Ltd.<br />Static demo build
+      </div>
+    </aside>
+  );
+}
+
+function DashboardPage({ data }) {
+  return (
+    <div>
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 26, marginBottom: 6, fontFamily: "var(--font-display)" }}>Executive Decision Dashboard</h1>
+        <p style={{ color: "var(--ink-soft)", fontSize: 14, maxWidth: 640, margin: 0 }}>Consolidated procurement and inventory decision view, calculated live from the embedded dataset.</p>
+      </div>
+      <KpiStrip>
+        <Kpi label="Total inventory value" value={inr(data.totalInventoryValue)} />
+        <Kpi label="Inventory health" value={`${data.inventoryHealthPct}%`} color="#3d7a5c" />
+        <Kpi label="Materials requiring procurement" value={data.recommendations.length} color="#b9762b" />
+        <Kpi label="Materials near expiry" value={data.nearExpiry.length} color="#a63a2e" />
+      </KpiStrip>
+      <div style={{ marginBottom: 32 }}>
+        <SectionHead title="Near-expiry materials" hint="Batches expiring within the configured window" />
+        <Panel>
+          {data.nearExpiry.length === 0 ? <div style={{ padding: 30, textAlign: "center", color: "var(--ink-soft)" }}>No materials currently flagged.</div> : (
+            <div style={{ overflowX: "auto" }}><table><thead><tr><th style={th}>Material</th><th style={th}>Batch</th><th style={{ ...th, textAlign: "right" }}>Current stock</th><th style={th}>Expiry date</th><th style={{ ...th, textAlign: "right" }}>Days remaining</th><th style={th}>Status</th></tr></thead>
+              <tbody>{data.nearExpiry.map((m) => (
+                <tr key={m.id} style={rowStyle(m.expiryStatus === "Critical" ? "critical" : "warning")}>
+                  <td style={td}>{m.material_name}</td><td style={{ ...td, fontFamily: "var(--font-mono)" }}>{m.batch_number}</td>
+                  <td style={tdNum}>{m.current_stock} {m.unit}</td><td style={{ ...td, fontFamily: "var(--font-mono)" }}>{m.expiry_date}</td>
+                  <td style={tdNum}>{m.daysToExpiry}d</td><td style={td}><Dot label={m.expiryStatus === "Critical" ? "Critical" : "Warning"} /></td>
+                </tr>))}</tbody></table></div>
+          )}
+        </Panel>
+      </div>
+      <div className="grid2" style={{ marginBottom: 32 }}>
+        <div>
+          <SectionHead title="Procurement recommendations" hint="At or below reorder point" />
+          <Panel><div style={{ overflowX: "auto" }}><table><thead><tr><th style={th}>Material</th><th style={{ ...th, textAlign: "right" }}>Current</th><th style={{ ...th, textAlign: "right" }}>Safety stock</th><th style={{ ...th, textAlign: "right" }}>Recommended qty</th><th style={th}>Primary supplier</th><th style={th}>Emergency</th></tr></thead>
+            <tbody>{data.recommendations.slice(0, 10).map((r) => (
+              <tr key={r.materialId} style={rowStyle(r.isHighPriority ? "critical" : "warning")}>
+                <td style={td}>{r.materialName}</td><td style={tdNum}>{r.currentStock}</td><td style={tdNum}>{r.safetyStock}</td>
+                <td style={tdNum}>{r.recommendedQty}</td><td style={td}>{r.primarySupplier?.name || "—"}</td><td style={td}>{r.emergencySupplier?.name || "—"}</td>
+              </tr>))}</tbody></table></div></Panel>
+        </div>
+        <div>
+          <SectionHead title="Supplier status" hint="Across the catalog" />
+          <Panel><div style={{ padding: "14px 16px" }}>
+            {[["Active suppliers", data.supplierInsights.totalSuppliers], ["Suppliers requiring attention", data.supplierInsights.flaggedCount],
+              ["Highest reliability", data.supplierInsights.highestReliability?.supplier_name], ["Fastest lead time", `${data.supplierInsights.fastestLeadTime?.lead_time_days}d`],
+              ["Lowest MOQ", data.supplierInsights.lowestMoq?.moq], ["Emergency coverage", `${data.supplierInsights.emergencyCoverage.covered}/${data.supplierInsights.emergencyCoverage.total}`]
+            ].map(([label, val]) => (
+              <div key={label} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid var(--line-soft)", fontSize: 13 }}>
+                <span style={{ color: "var(--ink-soft)" }}>{label}</span><span style={{ fontFamily: "var(--font-mono)", fontWeight: 500 }}>{val}</span>
+              </div>))}
+          </div></Panel>
+        </div>
+      </div>
+      <div>
+        <SectionHead title="Quick KPIs" />
+        <KpiStrip>
+          <Kpi label="Total products" value={data.quickKpis.totalProducts} /><Kpi label="Total materials" value={data.quickKpis.totalMaterials} />
+          <Kpi label="Active suppliers" value={data.quickKpis.activeSuppliers} /><Kpi label="Open purchase orders" value={data.quickKpis.openPurchaseOrders} />
+          <Kpi label="Inventory turnover" value={data.quickKpis.inventoryTurnover} />
+        </KpiStrip>
+      </div>
+    </div>
+  );
+}
+
+function InventoryPage({ data, onSaveOverride }) {
+  const [search, setSearch] = useState(""); const [statusFilter, setStatusFilter] = useState("All");
+  const [editingId, setEditingId] = useState(null); const [draft, setDraft] = useState({});
+  const rows = data.enrichedInventory.filter((r) => {
+    const matchesSearch = !search || r.material_name.toLowerCase().includes(search.toLowerCase()) || r.material_id.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === "All" || r.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+  const healthy = data.enrichedInventory.filter((r) => r.status === "Healthy").length;
+  const low = data.enrichedInventory.filter((r) => r.status === "Low").length;
+  const critical = data.enrichedInventory.filter((r) => r.status === "Critical").length;
+
+  function startEdit(row) {
+    setEditingId(row.id);
+    setDraft({ current_stock: row.current_stock, safety_stock: row.safety_stock, reorder_point: row.reorder_point });
+  }
+  function saveEdit(id) {
+    onSaveOverride(id, {
+      current_stock: Number(draft.current_stock), safety_stock: Number(draft.safety_stock), reorder_point: Number(draft.reorder_point)
+    });
+    setEditingId(null);
+  }
+
+  return (
+    <div>
+      <div style={{ marginBottom: 24 }}><h1 style={{ fontSize: 26, marginBottom: 6, fontFamily: "var(--font-display)" }}>Inventory</h1>
+        <p style={{ color: "var(--ink-soft)", fontSize: 14, maxWidth: 640, margin: 0 }}>Current stock position for every material, classified against safety stock and reorder point. Edits are saved to this browser.</p></div>
+      <KpiStrip><Kpi label="Total materials" value={data.enrichedInventory.length} /><Kpi label="Healthy" value={healthy} color="#3d7a5c" /><Kpi label="Low" value={low} color="#b9762b" /><Kpi label="Critical" value={critical} color="#a63a2e" /></KpiStrip>
+      <Panel>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: "1px solid var(--line)", flexWrap: "wrap", gap: 10 }}>
+          <h3 style={{ fontSize: 13.5, fontFamily: "var(--font-display)", margin: 0 }}>Material stock ledger</h3>
+          <div style={{ display: "flex", gap: 10 }}>
+            <input placeholder="Search materials…" value={search} onChange={(e) => setSearch(e.target.value)} style={inputStyle} />
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={inputStyle}><option>All</option><option>Healthy</option><option>Low</option><option>Critical</option></select>
+          </div>
+        </div>
+        <div style={{ maxHeight: 520, overflow: "auto" }}><table><thead><tr><th style={th}>Material</th><th style={th}>Batch</th><th style={{ ...th, textAlign: "right" }}>Current</th><th style={{ ...th, textAlign: "right" }}>Safety stock</th><th style={{ ...th, textAlign: "right" }}>Reorder point</th><th style={th}>Expiry</th><th style={th}>Health</th><th style={th}></th></tr></thead>
+          <tbody>{rows.map((r) => {
+            const isEditing = editingId === r.id;
+            return (
+            <tr key={r.id} style={rowStyle(r.status === "Critical" ? "critical" : r.status === "Low" ? "warning" : "healthy")}>
+              <td style={td}>{r.material_name}<div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--ink-faint)", marginTop: 3 }}>{r.material_id}</div></td>
+              <td style={{ ...td, fontFamily: "var(--font-mono)" }}>{r.batch_number}</td>
+              {isEditing ? (<>
+                <td style={tdNum}><input type="number" style={{ ...inputStyle, width: 75 }} value={draft.current_stock} onChange={(e) => setDraft({ ...draft, current_stock: e.target.value })} /></td>
+                <td style={tdNum}><input type="number" style={{ ...inputStyle, width: 75 }} value={draft.safety_stock} onChange={(e) => setDraft({ ...draft, safety_stock: e.target.value })} /></td>
+                <td style={tdNum}><input type="number" style={{ ...inputStyle, width: 75 }} value={draft.reorder_point} onChange={(e) => setDraft({ ...draft, reorder_point: e.target.value })} /></td>
+              </>) : (<>
+                <td style={tdNum}>{r.current_stock} {r.unit}</td><td style={tdNum}>{r.safety_stock}</td><td style={tdNum}>{r.reorder_point}</td>
+              </>)}
+              <td style={td}><span style={{ fontFamily: "var(--font-mono)" }}>{r.expiry_date}</span>{r.expiryStatus !== "OK" && <div style={{ marginTop: 3 }}><Dot label={r.expiryStatus} /></div>}</td>
+              <td style={td}><Dot label={r.status} /></td>
+              <td style={td}>{isEditing ? <button style={btnPrimary} onClick={() => saveEdit(r.id)}>Save</button> : <button style={btnSecondary(false)} onClick={() => startEdit(r)}>Edit</button>}</td>
+            </tr>);
+          })}</tbody></table></div>
+      </Panel>
+    </div>
+  );
+}
+
+function ProcurementPage({ data, purchaseOrders, onCreatePO, onSetPOStatus }) {
+  return (
+    <div>
+      <div style={{ marginBottom: 24 }}><h1 style={{ fontSize: 26, marginBottom: 6, fontFamily: "var(--font-display)" }}>Procurement</h1>
+        <p style={{ color: "var(--ink-soft)", fontSize: 14, maxWidth: 640, margin: 0 }}>Purchase requests and sourcing recommendations, calculated from inventory, supplier and consumption data.</p></div>
+      {data.recommendations.length > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", background: "#faf1e3", border: "1px solid #ecd5ab", color: "#7a5119", fontSize: 13, marginBottom: 20, flexWrap: "wrap" }}>
+          <strong>{data.recommendations.length} materials require procurement.</strong> Estimated spend {inr(data.estimatedSpend)}.
+          {data.highestPriorityMaterial && <> Highest priority: {data.highestPriorityMaterial.materialName}.</>}
+        </div>
+      )}
+      <div className="grid2" style={{ marginBottom: 32 }}>
+        <div>
+          <SectionHead title="Purchase requests" hint={`${data.recommendations.length} open`} />
+          <Panel><div style={{ overflowX: "auto" }}><table><thead><tr><th style={th}>Material</th><th style={{ ...th, textAlign: "right" }}>Current</th><th style={{ ...th, textAlign: "right" }}>Reorder pt</th><th style={{ ...th, textAlign: "right" }}>Rec. qty</th><th style={th}>Primary</th><th style={th}>Emergency</th><th style={th}>Reason</th><th style={th}></th></tr></thead>
+            <tbody>{data.recommendations.map((r) => (
+              <tr key={r.materialId} style={rowStyle(r.isHighPriority ? "critical" : "warning")}>
+                <td style={td}>{r.materialName}</td><td style={tdNum}>{r.currentStock} {r.unit}</td><td style={tdNum}>{r.reorderPoint}</td><td style={tdNum}>{r.recommendedQty}</td>
+                <td style={td}>{r.primarySupplier?.name || "—"}</td><td style={td}>{r.emergencySupplier?.name || "—"}</td><td style={td}>{r.reason}</td>
+                <td style={td}><button style={btnSecondary(!r.primarySupplier)} disabled={!r.primarySupplier} onClick={() => onCreatePO(r)}>Generate PO</button></td>
+              </tr>))}</tbody></table></div></Panel>
+        </div>
+        <div>
+          <SectionHead title="Summary" />
+          <Panel><div style={{ padding: "14px 16px" }}>
+            {[["Total purchase requests", data.recommendations.length], ["Estimated procurement cost", inr(data.estimatedSpend)],
+              ["High priority", `${data.highPriorityCount} of ${data.recommendations.length}`], ["Earliest predicted stockout", data.earliestStockout?.predictedStockoutDate || "—"]
+            ].map(([label, val]) => (
+              <div key={label} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid var(--line-soft)", fontSize: 13 }}>
+                <span style={{ color: "var(--ink-soft)" }}>{label}</span><span style={{ fontFamily: "var(--font-mono)", fontWeight: 500 }}>{val}</span>
+              </div>))}
+          </div></Panel>
+        </div>
+      </div>
+      <div>
+        <SectionHead title="Purchase orders" hint="Saved to this browser" />
+        <Panel><div style={{ overflowX: "auto" }}><table><thead><tr><th style={th}>PO number</th><th style={th}>Supplier</th><th style={th}>Material</th><th style={{ ...th, textAlign: "right" }}>Quantity</th><th style={{ ...th, textAlign: "right" }}>Lead time</th><th style={th}>Expected</th><th style={th}>Status</th><th style={th}></th></tr></thead>
+          <tbody>{purchaseOrders.length === 0 ? (
+            <tr><td colSpan={8} style={{ ...td, textAlign: "center", whiteSpace: "normal" }}>No purchase orders yet — generate one from a purchase request above.</td></tr>
+          ) : purchaseOrders.map((po) => (
+            <tr key={po.poNumber}>
+              <td style={{ ...td, fontFamily: "var(--font-mono)" }}>{po.poNumber}</td><td style={td}>{po.supplierName}</td><td style={td}>{po.materialName}</td>
+              <td style={tdNum}>{po.quantity}</td><td style={tdNum}>{po.leadTimeDays}d</td><td style={{ ...td, fontFamily: "var(--font-mono)" }}>{po.expectedDate}</td>
+              <td style={td}><Dot label={po.status} /></td>
+              <td style={td}>{po.status === "Pending" && <button style={btnSecondary(false)} onClick={() => onSetPOStatus(po.poNumber, "Approved")}>Approve</button>}</td>
+            </tr>))}</tbody></table></div></Panel>
+      </div>
+    </div>
+  );
+}
+
+function SuppliersPage({ data }) {
+  const [search, setSearch] = useState(""); const [availability, setAvailability] = useState("All"); const [page, setPage] = useState(1); const pageSize = 10;
+  const rows = data.suppliersRaw.map((s) => ({ ...s, material_name: data.materials.find((m) => m.material_id === s.material_id)?.material_name || s.material_id }))
+    .filter((r) => {
+      const matchesSearch = !search || r.supplier_name.toLowerCase().includes(search.toLowerCase()) || r.material_name.toLowerCase().includes(search.toLowerCase());
+      const matchesAvail = availability === "All" || r.availability === availability;
+      return matchesSearch && matchesAvail;
+    });
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize)); const pageRows = rows.slice((page - 1) * pageSize, page * pageSize);
+  return (
+    <div>
+      <div style={{ marginBottom: 24 }}><h1 style={{ fontSize: 26, marginBottom: 6, fontFamily: "var(--font-display)" }}>Suppliers</h1>
+        <p style={{ color: "var(--ink-soft)", fontSize: 14, maxWidth: 640, margin: 0 }}>Supplier catalog entries with search, filtering and evaluation criteria.</p></div>
+      <KpiStrip>
+        <Kpi label="Highest reliability" value={data.supplierInsights.highestReliability?.supplier_name?.split(" ")[0] || "—"} />
+        <Kpi label="Fastest lead time" value={`${data.supplierInsights.fastestLeadTime?.lead_time_days}d`} /><Kpi label="Lowest MOQ" value={data.supplierInsights.lowestMoq?.moq} />
+        <Kpi label="Requiring attention" value={data.supplierInsights.flaggedCount} color="#b9762b" />
+        <Kpi label="Emergency coverage" value={`${data.supplierInsights.emergencyCoverage.covered}/${data.supplierInsights.emergencyCoverage.total}`} color="#3d7a5c" />
+      </KpiStrip>
+      <Panel>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderBottom: "1px solid var(--line)", flexWrap: "wrap", gap: 10 }}>
+          <h3 style={{ fontSize: 13.5, fontFamily: "var(--font-display)", margin: 0 }}>Supplier catalog</h3>
+          <div style={{ display: "flex", gap: 10 }}>
+            <input placeholder="Search suppliers or materials…" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} style={inputStyle} />
+            <select value={availability} onChange={(e) => { setAvailability(e.target.value); setPage(1); }} style={inputStyle}><option>All</option><option>Available</option><option>Unavailable</option></select>
+          </div>
+        </div>
+        <div style={{ overflowX: "auto" }}><table><thead><tr><th style={th}>Supplier</th><th style={th}>Material</th><th style={{ ...th, textAlign: "right" }}>Unit price</th><th style={{ ...th, textAlign: "right" }}>Lead time</th><th style={{ ...th, textAlign: "right" }}>MOQ</th><th style={{ ...th, textAlign: "right" }}>Quality</th><th style={{ ...th, textAlign: "right" }}>Reliability</th><th style={th}>Availability</th></tr></thead>
+          <tbody>{pageRows.map((s) => (
+            <tr key={s.id}><td style={td}>{s.supplier_name}</td><td style={td}>{s.material_name}</td><td style={tdNum}>₹{s.unit_price}</td><td style={tdNum}>{s.lead_time_days}d</td>
+              <td style={tdNum}>{s.moq}</td><td style={tdNum}>{s.quality_score}</td><td style={tdNum}>{s.reliability_score}</td><td style={td}><Dot label={s.availability} /></td>
+            </tr>))}</tbody></table></div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px", borderTop: "1px solid var(--line)", flexWrap: "wrap", gap: 8 }}>
+          <span style={{ fontSize: 12.5, color: "var(--ink-soft)" }}>{rows.length} records</span>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} style={btnSecondary(page <= 1)}>Previous</button>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 12.5 }}>Page {page} of {totalPages}</span>
+            <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)} style={btnSecondary(page >= totalPages)}>Next</button>
+          </div>
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function ForecastingPage({ data }) {
+  const [materialId, setMaterialId] = useState(data.materials[0]?.material_id);
+  const forecast = useMemo(() => materialForecast(materialId, data.consumptionRaw, data.inventoryEnrichedById), [materialId, data]);
+  const material = data.materials.find((m) => m.material_id === materialId);
+  const chartData = (forecast.history || []).map((h) => ({ date: h.date.slice(5), qty: h.qty }));
+  return (
+    <div>
+      <div style={{ marginBottom: 24 }}><h1 style={{ fontSize: 26, marginBottom: 6, fontFamily: "var(--font-display)" }}>Demand Forecasting</h1>
+        <p style={{ color: "var(--ink-soft)", fontSize: 14, maxWidth: 640, margin: 0 }}>Material-level consumption trend, moving-average projection and stockout risk.</p></div>
+      <div style={{ maxWidth: 340, marginBottom: 24 }}>
+        <label style={{ fontSize: 12.5, color: "var(--ink-soft)", display: "block", marginBottom: 5 }}>Material</label>
+        <select value={materialId} onChange={(e) => setMaterialId(e.target.value)} style={{ ...inputStyle, width: "100%" }}>
+          {data.materials.map((m) => <option key={m.material_id} value={m.material_id}>{m.material_name} ({m.material_id})</option>)}
+        </select>
+      </div>
+      {!forecast.hasData ? <div style={{ padding: 30, textAlign: "center", color: "var(--ink-soft)" }}>No consumption history recorded for this material.</div> : (
+        <>
+          {forecast.currentStock <= forecast.reorderPoint && (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", background: "#faf1e3", border: "1px solid #ecd5ab", color: "#7a5119", fontSize: 13, marginBottom: 20 }}>
+              <strong>Procurement action recommended.</strong> {material?.material_name} is at or below its reorder point ({forecast.reorderPoint}).
+            </div>
+          )}
+          <KpiStrip>
+            <Kpi label="Average daily consumption" value={`${forecast.avgDailyConsumption} ${material?.unit}/day`} />
+            <Kpi label="Days of inventory remaining" value={forecast.daysOfInventoryRemaining ?? "—"} color="#b9762b" />
+            <Kpi label="Predicted stockout date" value={forecast.predictedStockoutDate || "—"} color="#a63a2e" />
+            <Kpi label="Forecast confidence" value={forecast.forecastConfidence} />
+          </KpiStrip>
+          <div className="grid2">
+            <div>
+              <SectionHead title="Historical consumption trend" hint={`${forecast.observedWindowDays} days observed`} />
+              <Panel style={{ padding: "16px" }}><TrendChart data={chartData} /></Panel>
+            </div>
+            <div>
+              <SectionHead title="Predicted consumption" />
+              <Panel><div style={{ padding: "14px 16px" }}>
+                {[["Next 30 days", `${forecast.predictedConsumption.next30} ${material?.unit}`], ["Next 60 days", `${forecast.predictedConsumption.next60} ${material?.unit}`],
+                  ["Next 90 days", `${forecast.predictedConsumption.next90} ${material?.unit}`], ["Current stock", `${forecast.currentStock} ${material?.unit}`],
+                  ["Reorder point", forecast.reorderPoint], ["Safety stock", forecast.safetyStock]
+                ].map(([label, val]) => (
+                  <div key={label} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid var(--line-soft)", fontSize: 13 }}>
+                    <span style={{ color: "var(--ink-soft)" }}>{label}</span><span style={{ fontFamily: "var(--font-mono)", fontWeight: 500 }}>{val}</span>
+                  </div>))}
+              </div></Panel>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function SettingsPage({ rules, setRules }) {
+  const weightTotal = rules.reliability_weight_pct + rules.quality_weight_pct + rules.unit_price_weight_pct + rules.lead_time_weight_pct;
+  const set = (key, val) => setRules({ ...rules, [key]: val });
+  const NumberField = ({ label, helper, value, onChange, suffix }) => (
+    <div style={{ marginBottom: 14 }}>
+      <label style={{ fontSize: 12.5, color: "var(--ink-soft)", display: "block", marginBottom: 5 }}>{label}</label>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <input type="number" value={value} onChange={(e) => onChange(Number(e.target.value))} style={{ ...inputStyle, width: 110 }} />
+        {suffix && <span style={{ fontSize: 12.5, color: "var(--ink-soft)" }}>{suffix}</span>}
+      </div>
+      {helper && <span style={{ fontSize: 11.5, color: "var(--ink-faint)" }}>{helper}</span>}
+    </div>
+  );
+  const WeightSlider = ({ label, value, onChange }) => (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}><span>{label}</span><span style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}>{value}%</span></div>
+      <input type="range" min="0" max="100" value={value} onChange={(e) => onChange(Number(e.target.value))} style={{ width: "100%", accentColor: "#0f7f82" }} />
+    </div>
+  );
+  return (
+    <div>
+      <div style={{ marginBottom: 24 }}><h1 style={{ fontSize: 26, marginBottom: 6, fontFamily: "var(--font-display)" }}>Business Rules Configuration</h1>
+        <p style={{ color: "var(--ink-soft)", fontSize: 14, maxWidth: 640, margin: 0 }}>Configure inventory thresholds, procurement buffers, supplier scoring weights and forecast settings. Changes apply immediately and are saved to this browser.</p></div>
+      <div className="grid2">
+        <div>
+          <SectionHead title="Inventory rules" hint="Expiry windows, safety stock buffer" />
+          <Panel style={{ padding: 18, marginBottom: 24 }}>
+            <div className="twocol">
+              <NumberField label="Near expiry threshold" helper="Batches expiring within this window are flagged." value={rules.near_expiry_threshold_days} onChange={(v) => set("near_expiry_threshold_days", v)} suffix="days" />
+              <NumberField label="Critical expiry threshold" helper="Batches inside this window are escalated." value={rules.critical_expiry_threshold_days} onChange={(v) => set("critical_expiry_threshold_days", v)} suffix="days" />
+              <NumberField label="Safety stock buffer" helper="Additional cover above expected consumption." value={rules.safety_stock_buffer_pct} onChange={(v) => set("safety_stock_buffer_pct", v)} suffix="%" />
+              <NumberField label="Inventory health threshold" helper="Minimum health score considered acceptable." value={rules.inventory_health_threshold_pct} onChange={(v) => set("inventory_health_threshold_pct", v)} suffix="%" />
+            </div>
+          </Panel>
+          <SectionHead title="Procurement rules" hint="Reorder buffers, default order sizing" />
+          <Panel style={{ padding: 18 }}>
+            <div className="twocol">
+              <NumberField label="Reorder point buffer" helper="Uplift over the calculated reorder point." value={rules.reorder_point_buffer_pct} onChange={(v) => set("reorder_point_buffer_pct", v)} suffix="%" />
+              <NumberField label="Emergency supplier lead time" helper="Assumed lead time from a backup supplier." value={rules.emergency_supplier_lead_time_days} onChange={(v) => set("emergency_supplier_lead_time_days", v)} suffix="days" />
+              <NumberField label="Default procurement multiplier" helper="Order quantity as a multiple of safety stock." value={rules.default_procurement_qty_multiplier} onChange={(v) => set("default_procurement_qty_multiplier", v)} suffix="× safety stock" />
+            </div>
+          </Panel>
+        </div>
+        <div>
+          <SectionHead title="Supplier scoring" />
+          <Panel style={{ padding: 18 }}>
+            <p style={{ fontSize: 12.5, color: "var(--ink-soft)", marginTop: 0 }}>Ranking weights used to compare qualified suppliers. Must total 100%.</p>
+            <WeightSlider label="Reliability weight" value={rules.reliability_weight_pct} onChange={(v) => set("reliability_weight_pct", v)} />
+            <WeightSlider label="Quality weight" value={rules.quality_weight_pct} onChange={(v) => set("quality_weight_pct", v)} />
+            <WeightSlider label="Unit price weight" value={rules.unit_price_weight_pct} onChange={(v) => set("unit_price_weight_pct", v)} />
+            <WeightSlider label="Lead time weight" value={rules.lead_time_weight_pct} onChange={(v) => set("lead_time_weight_pct", v)} />
+            <div style={{ marginTop: 8, padding: "10px 16px", fontSize: 13, background: weightTotal === 100 ? "#e8f2ec" : "#f8e9e6", border: `1px solid ${weightTotal === 100 ? "#bfe0cf" : "#e6c2ba"}`, color: weightTotal === 100 ? "#265c40" : "#7a2c21" }}>
+              {weightTotal === 100 ? "Weights are balanced." : `Weights total ${weightTotal}% — adjust to reach 100%.`}
+            </div>
+          </Panel>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const STORAGE_KEYS = { rules: "pidip_rules_v1", overrides: "pidip_inventory_overrides_v1", pos: "pidip_purchase_orders_v1" };
+
+function loadStored(key, fallback) {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function App() {
+  const [active, setActive] = useState("dashboard");
+  const [rules, setRules] = useState(() => loadStored(STORAGE_KEYS.rules, DEFAULT_RULES));
+  const [inventoryOverrides, setInventoryOverrides] = useState(() => loadStored(STORAGE_KEYS.overrides, {}));
+  const [purchaseOrders, setPurchaseOrders] = useState(() => loadStored(STORAGE_KEYS.pos, []));
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const data = useComputed(rules, inventoryOverrides, purchaseOrders);
+
+  React.useEffect(() => { window.localStorage.setItem(STORAGE_KEYS.rules, JSON.stringify(rules)); }, [rules]);
+  React.useEffect(() => { window.localStorage.setItem(STORAGE_KEYS.overrides, JSON.stringify(inventoryOverrides)); }, [inventoryOverrides]);
+  React.useEffect(() => { window.localStorage.setItem(STORAGE_KEYS.pos, JSON.stringify(purchaseOrders)); }, [purchaseOrders]);
+
+  function saveInventoryOverride(id, values) {
+    setInventoryOverrides((prev) => ({ ...prev, [id]: { ...(prev[id] || {}), ...values } }));
+  }
+
+  function createPurchaseOrder(rec) {
+    const year = new Date().getFullYear();
+    const poNumber = `PO-${year}-${String(purchaseOrders.length + 1).padStart(4, "0")}`;
+    const expected = new Date(Date.now() + (rec.primarySupplier.leadTimeDays || 7) * DAY_MS).toISOString().slice(0, 10);
+    const po = {
+      poNumber, materialId: rec.materialId, materialName: rec.materialName,
+      supplierName: rec.primarySupplier.name, quantity: rec.recommendedQty,
+      leadTimeDays: rec.primarySupplier.leadTimeDays, expectedDate: expected, status: "Pending",
+      createdAt: new Date().toISOString()
+    };
+    setPurchaseOrders((prev) => [po, ...prev]);
+  }
+
+  function setPOStatus(poNumber, status) {
+    setPurchaseOrders((prev) => prev.map((po) => (po.poNumber === poNumber ? { ...po, status } : po)));
+  }
+
+  function resetDemoData() {
+    if (!window.confirm("Reset all saved changes in this browser back to the original demo data?")) return;
+    setRules(DEFAULT_RULES); setInventoryOverrides({}); setPurchaseOrders([]);
+  }
+
+  return (
+    <div style={{ display: "flex", minHeight: "100vh" }}>
+      <div className="sidebar-desktop"><Sidebar active={active} onChange={setActive} /></div>
+      {mobileOpen && <div onClick={() => setMobileOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 15 }} />}
+      <div className="sidebar-mobile" style={{ display: mobileOpen ? "block" : "none" }}><Sidebar active={active} onChange={setActive} mobileOpen={true} setMobileOpen={setMobileOpen} /></div>
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid var(--line)", background: "#fff" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button className="hamburger" onClick={() => setMobileOpen(true)} style={{ display: "none", border: "1px solid var(--line)", background: "#fff", borderRadius: 3, padding: "6px 9px", cursor: "pointer" }}>☰</button>
+            <div style={{ fontSize: 13, color: "var(--ink-soft)" }}>Procurement &amp; Inventory Decision Intelligence Platform</div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button onClick={resetDemoData} style={btnSecondary(false)}>Reset saved data</button>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, padding: "3px 8px", border: "1px solid var(--line)", borderRadius: 3, color: "var(--ink-soft)" }}>Installable app · saves to this device</div>
+          </div>
+        </div>
+        <div style={{ padding: 32, maxWidth: 1240, width: "100%", margin: "0 auto" }}>
+          {active === "dashboard" && <DashboardPage data={data} />}
+          {active === "inventory" && <InventoryPage data={data} onSaveOverride={saveInventoryOverride} />}
+          {active === "procurement" && <ProcurementPage data={data} purchaseOrders={purchaseOrders} onCreatePO={createPurchaseOrder} onSetPOStatus={setPOStatus} />}
+          {active === "suppliers" && <SuppliersPage data={data} />}
+          {active === "forecasting" && <ForecastingPage data={data} />}
+          {active === "settings" && <SettingsPage rules={rules} setRules={setRules} />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+
+<script>
+  // Registers the service worker so the app is installable and works offline.
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("service-worker.js").catch(() => {});
+    });
+  }
+</script>
+
+<style>
+  .grid2{ display:grid; grid-template-columns:1.6fr 1fr; gap:20px; align-items:start; }
+  .twocol{ display:grid; grid-template-columns:1fr 1fr; gap:0 24px; }
+  .sidebar-mobile{ position:fixed; top:0; left:0; height:100vh; z-index:20; }
+  @media (max-width: 980px){
+    .grid2{ grid-template-columns:1fr; }
+    .twocol{ grid-template-columns:1fr; }
+    .sidebar-desktop{ display:none; }
+    .hamburger{ display:inline-block !important; }
+  }
+  @media (min-width: 981px){
+    .sidebar-mobile{ display:none !important; }
+  }
+</style>
+</body>
+</html>
