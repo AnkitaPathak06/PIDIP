@@ -1,4 +1,6 @@
-const Pages = window.Pages || {};
+(function () {
+  window.Pages = window.Pages || {};
+  const Pages = window.Pages;
 
 Pages.forecasting = function (main, model) {
   const materials = model.materials.filter((m) => m.forecast.recordCount > 0);
@@ -188,5 +190,4 @@ Pages.forecasting = function (main, model) {
 
   select.addEventListener("change", (e) => renderDetail(e.target.value));
 };
-
-window.Pages = Pages;
+})();

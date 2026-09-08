@@ -1,4 +1,6 @@
-const Pages = window.Pages || {};
+(function () {
+  window.Pages = window.Pages || {};
+  const Pages = window.Pages;
 
 Pages.dashboard = function (main, model) {
   const { summary, materialsRequiringProcurement, nearExpiryMaterials, supplierCatalog } = model;
@@ -166,5 +168,4 @@ function statusBadge(status) {
   const cls = status === "Critical" ? "badge badge-red" : "badge badge-amber";
   return `<span class="${cls}">${status}</span>`;
 }
-
-window.Pages = Pages;
+})();

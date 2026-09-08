@@ -1,4 +1,6 @@
-const Pages = window.Pages || {};
+(function () {
+  window.Pages = window.Pages || {};
+  const Pages = window.Pages;
 
 Pages.settings = function (main, model) {
   const r = structuredClone(model.rules);
@@ -125,5 +127,4 @@ function sliderField(id, label, value) {
       <input id="${id}" type="range" min="0" max="100" step="1" value="${value}" />
     </div>`;
 }
-
-window.Pages = Pages;
+})();

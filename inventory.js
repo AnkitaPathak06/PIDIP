@@ -1,4 +1,6 @@
-const Pages = window.Pages || {};
+(function () {
+  window.Pages = window.Pages || {};
+  const Pages = window.Pages;
 
 Pages.inventory = function (main, model) {
   const writeEnabled = WriteAPI.isConfigured();
@@ -136,5 +138,4 @@ async function saveEdit(tr, material) {
     saveBtn.textContent = "Save";
   }
 }
-
-window.Pages = Pages;
+})();

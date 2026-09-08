@@ -1,4 +1,6 @@
-const Pages = window.Pages || {};
+(function () {
+  window.Pages = window.Pages || {};
+  const Pages = window.Pages;
 
 Pages.procurement = function (main, model) {
   const list = model.materialsRequiringProcurement;
@@ -75,5 +77,4 @@ function reasonFor(m) {
   }
   return "Below reorder point";
 }
-
-window.Pages = Pages;
+})();

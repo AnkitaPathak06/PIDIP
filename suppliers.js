@@ -1,4 +1,6 @@
-const Pages = window.Pages || {};
+(function () {
+  window.Pages = window.Pages || {};
+  const Pages = window.Pages;
 
 Pages.suppliers = function (main, model) {
   const catalog = model.supplierCatalog;
@@ -94,5 +96,4 @@ function renderRows(catalog) {
     )
     .join("");
 }
-
-window.Pages = Pages;
+})();
