@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PIDIP — Procurement &amp; Inventory Decision Intelligence Platform</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <nav class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">PI</div>
+        <div>
+          <div class="brand-title">PIDIP</div>
+          <div class="brand-sub">Decision Intelligence</div>
+        </div>
+      </div>
+
+      <div class="nav-section-label">Operations</div>
+      <a class="nav-link" data-route="dashboard" href="#/dashboard"><span class="ic">&#9635;</span> Dashboard</a>
+      <a class="nav-link" data-route="inventory" href="#/inventory"><span class="ic">&#128230;</span> Inventory</a>
+      <a class="nav-link" data-route="procurement" href="#/procurement"><span class="ic">&#128722;</span> Procurement</a>
+      <a class="nav-link" data-route="suppliers" href="#/suppliers"><span class="ic">&#127970;</span> Suppliers</a>
+
+      <div class="nav-section-label">Intelligence</div>
+      <a class="nav-link" data-route="forecasting" href="#/forecasting"><span class="ic">&#128200;</span> Forecasting</a>
+
+      <div class="nav-section-label">System</div>
+      <a class="nav-link" data-route="settings" href="#/settings"><span class="ic">&#9881;</span> Settings</a>
+
+      <div class="sidebar-footer">
+        Prototype build — reads live from Google Sheets.
+      </div>
+    </nav>
+
+    <div class="main-col">
+      <header class="topbar">
+        <h1 id="page-title">Executive Decision Dashboard</h1>
+        <div class="topbar-right">
+          <span>Last refresh: <strong id="last-refresh">—</strong></span>
+          <button id="refresh-btn" class="btn">&#8635; Refresh</button>
+        </div>
+      </header>
+      <main id="main-content"></main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+  <script src="config.js"></script>
+  <script src="utils.js"></script>
+  <script src="gsheets.js"></script>
+  <script src="rules.js"></script>
+  <script src="write.js"></script>
+  <script src="engine.js"></script>
+  <script src="dashboard.js"></script>
+  <script src="inventory.js"></script>
+  <script src="procurement.js"></script>
+  <script src="suppliers.js"></script>
+  <script src="forecasting.js"></script>
+  <script src="settings.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
